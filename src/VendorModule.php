@@ -113,7 +113,7 @@ class VendorModule
         $data = $this->getJson();
 
         // Only expose if correct type
-        if ($data['type'] !== VendorPlugin::MODULE_TYPE) {
+        if (empty($data['type']) || $data['type'] !== VendorPlugin::MODULE_TYPE) {
             return [];
         }
 
