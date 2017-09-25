@@ -48,6 +48,16 @@ class VendorModule
     }
 
     /**
+     * Get module name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
      * Get full path to the root install for this project
      *
      * @param string $base Rewrite root (or 'vendor' for actual module path)
