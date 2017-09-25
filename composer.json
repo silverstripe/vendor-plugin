@@ -15,7 +15,10 @@
         }
     },
     "extra": {
-        "class": "SilverStripe\\VendorPlugin\\VendorPlugin"
+        "class": "SilverStripe\\VendorPlugin\\VendorPlugin",
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
     },
     "minimum-stability": "dev",
     "require": {
