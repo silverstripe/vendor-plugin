@@ -3,6 +3,8 @@
 namespace SilverStripe\VendorPlugin\Methods;
 
 use Composer\Util\Filesystem;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use RuntimeException;
 
 /**
@@ -26,10 +28,39 @@ class CopyMethod implements ExposeMethod
     {
         // Skip if symlink
         if ($this->filesystem->isSymlinkedDirectory($target)) {
-            return;
+            $this->filesystem->unlink($target);
         }
-        if (!$this->filesystem->copy($source, $target)) {
+        if (!$this->copy($source, $target)) {
             throw new RuntimeException("Could not write to directory $target");
         }
+    }
+
+    /**
+     * Copies a file or directory from $source to $target.
+     *
+     * @todo Replace with `$this->filesystem->copy() once composer 1.6.0 is released
+     *
+     * @param string $source
+     * @param string $target
+     * @return bool
+     */
+    public function copy($source, $target)
+    {
+        if (!is_dir($source)) {
+            return copy($source, $target);
+        }
+        $it = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
+        $ri = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::SELF_FIRST);
+        $this->filesystem->ensureDirectoryExists($target);
+        $result = true;
+        foreach ($ri as $file) {
+            $targetPath = $target . DIRECTORY_SEPARATOR . $ri->getSubPathName();
+            if ($file->isDir()) {
+                $this->filesystem->ensureDirectoryExists($targetPath);
+            } else {
+                $result = $result && copy($file->getPathname(), $targetPath);
+            }
+        }
+        return $result;
     }
 }
