@@ -100,8 +100,14 @@ class VendorModule
      */
     public function getExposedFolders()
     {
-        // Get all dirs to expose
         $data = $this->getJson();
+
+        // Only expose if correct type
+        if ($data['type'] !== VendorPlugin::MODULE_TYPE) {
+            return [];
+        }
+
+        // Get all dirs to expose
         if (empty($data['extra']['expose'])) {
             return [];
         }
