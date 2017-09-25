@@ -64,7 +64,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
      *
      * @param PackageEvent $event
      */
-    public function exposeVendorModule(PackageEvent $event)
+    public function installPackage(PackageEvent $event)
     {
         // Ensure package is the valid type
         $package = $this->getOperationPackage($event);
