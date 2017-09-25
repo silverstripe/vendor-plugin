@@ -24,6 +24,10 @@ class CopyMethod implements ExposeMethod
 
     public function exposeDirectory($source, $target)
     {
+        // Skip if symlink
+        if ($this->filesystem->isSymlinkedDirectory($target)) {
+            return;
+        }
         if (!$this->filesystem->copy($source, $target)) {
             throw new RuntimeException("Could not write to directory $target");
         }
