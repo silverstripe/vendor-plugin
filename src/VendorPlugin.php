@@ -139,6 +139,12 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
         $name = $module->getName();
         $event->getIO()->write("Removing web directories for module <info>{$name}</info>:");
         $filesystem->removeDirectory($target);
+
+        // Cleanup empty vendor dir if this is the last module
+        $vendorTarget = dirname($target);
+        if ($filesystem->isDirEmpty($vendorTarget)) {
+            $filesystem->removeDirectory($vendorTarget);
+        }
     }
 
     /**
