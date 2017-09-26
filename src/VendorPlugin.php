@@ -11,6 +11,7 @@ use Composer\Installer\PackageEvent;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Plugin\PluginInterface;
+use Composer\Util\Filesystem;
 use SilverStripe\VendorPlugin\Methods\CopyMethod;
 use SilverStripe\VendorPlugin\Methods\ExposeMethod;
 use SilverStripe\VendorPlugin\Methods\ChainedMethod;
@@ -56,7 +57,30 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
         return [
             'post-package-update' => 'installPackage',
             'post-package-install' => 'installPackage',
+            'pre-package-uninstall' => 'uninstallPackage',
         ];
+    }
+
+    /**
+     * Get vendor module instance for this event
+     *
+     * @param PackageEvent $event
+     * @return VendorModule
+     */
+    protected function getVendorModule(PackageEvent $event)
+    {
+        // Ensure package is the valid type
+        $package = $this->getOperationPackage($event);
+        if (!$package || $package->getType() !== self::MODULE_TYPE) {
+            return null;
+        }
+
+        // Find project path
+        $projectPath = dirname(realpath(Factory::getComposerFile()));
+        $name = $package->getName();
+
+        // Build module
+        return new VendorModule($projectPath, $name);
     }
 
     /**
@@ -66,32 +90,54 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
      */
     public function installPackage(PackageEvent $event)
     {
-        // Ensure package is the valid type
-        $package = $this->getOperationPackage($event);
-        if (!$package || $package->getType() !== self::MODULE_TYPE) {
+        // Check and log all folders being exposed
+        $module = $this->getVendorModule($event);
+        if (!$module) {
             return;
         }
 
-        // Find project path
-        $projectPath = dirname(realpath(Factory::getComposerFile()));
-        $name = $package->getName();
-        $module = new VendorModule($projectPath, $name);
-
-        // Check and log all folders being exposed
+        // Skip if module has no public resources
         $folders = $module->getExposedFolders();
         if (empty($folders)) {
             return;
         }
 
         // Log details
+        $name = $module->getName();
         $event->getIO()->write("Exposing web directories for module <info>{$name}</info>:");
         foreach ($folders as $folder) {
             $event->getIO()->write("  - <info>$folder</info>");
         }
 
-        // Expose webdirs with given method
+        // Expose web dirs with given method
         $method = $this->getMethod();
         $module->exposePaths($method);
+    }
+
+    /**
+     * Remove package
+     *
+     * @param PackageEvent $event
+     */
+    public function uninstallPackage(PackageEvent $event)
+    {
+        // Ensure package is the valid type
+        $module = $this->getVendorModule($event);
+        if (!$module) {
+            return;
+        }
+
+        // Check path to remove
+        $target = $module->getModulePath(VendorModule::DEFAULT_TARGET);
+        $filesystem = new Filesystem();
+        if (!is_dir($target)) {
+            return;
+        }
+
+        // Remove directory
+        $name = $module->getName();
+        $event->getIO()->write("Removing web directories for module <info>{$name}</info>:");
+        $filesystem->removeDirectory($target);
     }
 
     /**
