@@ -4,6 +4,7 @@ namespace SilverStripe\VendorPlugin;
 
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
+use Composer\DependencyResolver\Operation\UninstallOperation;
 use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Factory;
@@ -174,6 +175,9 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
             return $operation->getTargetPackage();
         }
         if ($operation instanceof InstallOperation) {
+            return $operation->getPackage();
+        }
+        if ($operation instanceof UninstallOperation) {
             return $operation->getPackage();
         }
         return null;
