@@ -24,13 +24,13 @@ class SymlinkMethod implements ExposeMethod
 
     public function exposeDirectory($source, $target)
     {
+        // Remove destination directory to ensure it is clean
+        $this->filesystem->removeDirectory($target);
+
+        // Ensure parent dir exist
         $parent = dirname($target);
         $this->filesystem->ensureDirectoryExists($parent);
 
-        // Delete target if exists
-        if (file_exists($target)) {
-            $this->filesystem->removeDirectory($target);
-        }
         // Ensure symlink exists
         if (!$this->filesystem->relativeSymlink($source, $target)) {
             throw new RuntimeException("Could not create symlink at $target");
