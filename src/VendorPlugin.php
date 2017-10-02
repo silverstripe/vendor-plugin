@@ -34,11 +34,6 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
     const METHOD_ENV = 'SS_VENDOR_METHOD';
 
     /**
-     * Method name for "none" option
-     */
-    const METHOD_NONE = 'none';
-
-    /**
      * Method name to auto-attempt best method
      */
     const METHOD_AUTO = 'auto';
@@ -158,9 +153,6 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
                 return new CopyMethod();
             case SymlinkMethod::NAME:
                 return new SymlinkMethod();
-            case self::METHOD_NONE:
-                // 'none' is forced to an empty chain
-                return new ChainedMethod([]);
             case self::METHOD_AUTO:
             default:
                 // Default to safe-failover method
