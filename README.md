@@ -41,9 +41,18 @@ filesystem copy.
 If necessary, you can force the behaviour to one of the below using the
 `SS_VENDOR_METHOD` environment variable (set in your system environment prior to install):
 
-  - `none` - Disables all symlink / copy
+  - `none` - Disables all symlink / copy (see "Disabling the behaviour")
   - `copy` - Performs a copy only
   - `symlink` - Performs a symlink only
   - `auto` -> Perfrm symlink, but fail over to copy.
 
 Any other value will be treated as `auto` 
+
+## Disabling the behaviour
+
+While `SS_VENDOR_METHOD=none` will disable any symlink/copy operations,
+the module itself will still be installed in `vendor/` like any other composer module.
+This means you need to remove any default URL rewrites in `SimpleResourceURLGenerator.url_rewrites`,
+and whitelist access into specific package folders which the browser needs to access in your own
+rewriting rules (e.g. `.htaccess`). For example, you'll need to whitelist `vendor/silverstripe/admin/client/dist`
+access for the CMS to work. We do not recommend whitelisting the whole `vendor/` folder for public access.
