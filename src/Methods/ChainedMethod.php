@@ -36,7 +36,7 @@ class ChainedMethod implements ExposeMethod
         foreach ($this->failovers as $failover) {
             try {
                 $failover->exposeDirectory($source, $target);
-                break; // Break on first success
+                return; // Return on first success
             } catch (RuntimeException $lastException) {
 
             }
