@@ -38,7 +38,6 @@ class ChainedMethod implements ExposeMethod
                 $failover->exposeDirectory($source, $target);
                 return; // Return on first success
             } catch (RuntimeException $lastException) {
-
             }
         }
         if ($lastException) {

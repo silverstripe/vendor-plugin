@@ -4,7 +4,8 @@ namespace SilverStripe\VendorPlugin\Methods;
 
 use RuntimeException;
 
-interface ExposeMethod {
+interface ExposeMethod
+{
 
     /**
      * Exposes the directory with the given paths

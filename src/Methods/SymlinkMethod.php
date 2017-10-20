@@ -3,6 +3,7 @@
 namespace SilverStripe\VendorPlugin\Methods;
 
 use Composer\Util\Filesystem;
+use Composer\Util\Platform;
 use RuntimeException;
 
 /**
@@ -32,8 +33,24 @@ class SymlinkMethod implements ExposeMethod
         $this->filesystem->ensureDirectoryExists($parent);
 
         // Ensure symlink exists
-        if (!$this->filesystem->relativeSymlink($source, $target)) {
+        if (!$this->relativeSymlink($source, $target)) {
             throw new RuntimeException("Could not create symlink at $target");
         }
+    }
+
+    /**
+     * Create symlink
+     *
+     * @param string $source File source
+     * @param string $target Place to put symlink
+     * @return bool
+     */
+    protected function relativeSymlink($source, $target)
+    {
+        if (Platform::isWindows()) {
+            $this->filesystem->junction($source, $target);
+            return true;
+        }
+        return $this->filesystem->relativeSymlink($source, $target);
     }
 }
