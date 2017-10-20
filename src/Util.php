@@ -14,8 +14,10 @@ class Util
     {
         $combined = null;
         array_walk_recursive($parts, function ($part) use (&$combined) {
+            // Normalise path
+            $part = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $part);
             $combined = $combined
-                ? (rtrim($combined, '\\/') . DIRECTORY_SEPARATOR . $part)
+                ? (rtrim($combined, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $part)
                 : $part;
         });
         return $combined;

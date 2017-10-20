@@ -1,0 +1,25 @@
+language: php
+
+dist: trusty
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+matrix:
+  include:
+    - php: 5.6
+    - php: 7.2
+
+fast_finish: true
+
+before_script:
+  - phpenv rehash
+  - export PATH=~/.composer/vendor/bin:$PATH
+  - composer validate
+  - composer global require squizlabs/php_codesniffer:^3 --prefer-dist --no-interaction --no-progress --no-suggest -o
+  - composer install --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile
+
+script:
+  - vendor/bin/phpunit
+  - composer run-script lint
