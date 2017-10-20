@@ -41,9 +41,8 @@ filesystem copy.
 If necessary, you can force the behaviour to one of the below using the
 `SS_VENDOR_METHOD` environment variable (set in your system environment prior to install):
 
-  - `none` - Disables all symlink / copy
   - `copy` - Performs a copy only
   - `symlink` - Performs a symlink only
-  - `auto` -> Perfrm symlink, but fail over to copy.
+  - `auto` -> Perform symlink, but fail over to copy.
 
 Any other value will be treated as `auto` 
