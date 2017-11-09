@@ -13,6 +13,7 @@ use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Util\Filesystem;
+use DirectoryIterator;
 use SilverStripe\VendorPlugin\Methods\CopyMethod;
 use SilverStripe\VendorPlugin\Methods\ExposeMethod;
 use SilverStripe\VendorPlugin\Methods\ChainedMethod;
@@ -42,6 +43,16 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
      * Method name to auto-attempt best method
      */
     const METHOD_AUTO = 'auto';
+
+    /**
+     * @var Filesystem
+     */
+    protected $filesystem = null;
+
+    public function __construct()
+    {
+        $this->filesystem = new Filesystem();
+    }
 
     /**
      * Apply vendor plugin
@@ -77,7 +88,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
         }
 
         // Find project path
-        $projectPath = dirname(realpath(Factory::getComposerFile()));
+        $projectPath = $this->getProjectPath();
         $name = $package->getName();
 
         // Build module
@@ -110,9 +121,42 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
             $event->getIO()->write("  - <info>$folder</info>");
         }
 
+        // Setup root folder
+        $this->setupResources();
+
         // Expose web dirs with given method
         $method = $this->getMethod();
         $module->exposePaths($method);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getProjectPath()
+    {
+        return dirname(realpath(Factory::getComposerFile()));
+    }
+
+    /**
+     * Ensure the resources folder is safely created and protected from index.php in root
+     */
+    protected function setupResources()
+    {
+        // Setup root dir
+        $resourcesPath = Util::joinPaths(
+            $this->getProjectPath(),
+            VendorModule::DEFAULT_TARGET
+        );
+        $this->filesystem->ensureDirectoryExists($resourcesPath);
+
+        // Copy missing resources
+        $files = new DirectoryIterator(__DIR__.'/../resources');
+        foreach ($files as $file) {
+            $targetPath = $resourcesPath . DIRECTORY_SEPARATOR . $file->getFilename();
+            if ($file->isFile() && !file_exists($targetPath)) {
+                copy($file->getPathname(), $targetPath);
+            }
+        }
     }
 
     /**
@@ -130,7 +174,6 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
 
         // Check path to remove
         $target = $module->getModulePath(VendorModule::DEFAULT_TARGET);
-        $filesystem = new Filesystem();
         if (!is_dir($target)) {
             return;
         }
@@ -138,12 +181,12 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
         // Remove directory
         $name = $module->getName();
         $event->getIO()->write("Removing web directories for module <info>{$name}</info>:");
-        $filesystem->removeDirectory($target);
+        $this->filesystem->removeDirectory($target);
 
         // Cleanup empty vendor dir if this is the last module
         $vendorTarget = dirname($target);
-        if ($filesystem->isDirEmpty($vendorTarget)) {
-            $filesystem->removeDirectory($vendorTarget);
+        if ($this->filesystem->isDirEmpty($vendorTarget)) {
+            $this->filesystem->removeDirectory($vendorTarget);
         }
     }
 

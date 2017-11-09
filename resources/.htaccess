@@ -1,0 +1,5 @@
+# Block 404s
+<IfModule mod_rewrite.c>
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule .* - [R=404,L]
+</IfModule>
