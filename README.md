@@ -44,6 +44,15 @@ If necessary, you can force the behaviour to one of the below using the
   - `none` - Disables all symlink / copy
   - `copy` - Performs a copy only
   - `symlink` - Performs a symlink only
-  - `auto` -> Perfrm symlink, but fail over to copy.
+  - `junction` - Uses a junction (windows only)
+  - `auto` -> Perfrm symlink (or junction on windows), but fail over to copy.
 
-Any other value will be treated as `auto` 
+## Updating all exposed folders
+
+A custom composer command can be run at any time to update / refresh all 
+
+`composer vendor-expose [<method>]`
+
+You can pass in one of the above methods to force a specific behaviour, otherwise
+the default will be chosen based on either a previously used method,
+or the `SS_VENDOR_METHOD` environment argument. 
