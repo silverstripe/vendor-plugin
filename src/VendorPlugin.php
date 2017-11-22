@@ -14,6 +14,7 @@ use Composer\Package\PackageInterface;
 use Composer\Plugin\Capability\CommandProvider;
 use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
+use Composer\Script\Event;
 use Composer\Util\Filesystem;
 use SilverStripe\VendorPlugin\Console\VendorCommandProvider;
 
@@ -78,6 +79,8 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
             'post-package-update' => 'installPackage',
             'post-package-install' => 'installPackage',
             'pre-package-uninstall' => 'uninstallPackage',
+            'post-install-cmd' => 'installRootPackage',
+            'post-update-cmd' => 'installRootPackage',
         ];
     }
 
@@ -100,7 +103,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
         $name = $package->getName();
 
         // Build module
-        return new VendorModule($projectPath, $name);
+        return new VendorModule($projectPath, $name, $package, $event->getComposer());
     }
 
     /**
@@ -119,6 +122,33 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
         // Run with task
         $task = new VendorExposeTask($this->getProjectPath(), $this->filesystem, VendorModule::DEFAULT_TARGET);
         $task->process($event->getIO(), [$module]);
+    }
+
+    /**
+     * Install resources from the root package
+     *
+     * @param Event $event
+     */
+    public function installRootPackage(Event $event)
+    {
+        $package = $event->getComposer()->getPackage();
+        if ($package->getType() === self::MODULE_TYPE) {
+            $extra = $package->getExtra();
+            if (!empty($extra['expose'])) {
+                $name = $package->getName();
+                $event->getIO()->write("Exposing web directories for module <info>{$name}</info>:");
+                foreach ($extra['expose'] as $folder) {
+                    $event->getIO()->write("  - <info>$folder</info>");
+                }
+                $module = new VendorModule(
+                    $this->getProjectPath(),
+                    $package->getName(),
+                    $package,
+                    $event->getComposer()
+                );
+                $module->exposePaths($this->getMethod());
+            }
+        }
     }
 
     /**

@@ -2,9 +2,12 @@
 
 namespace SilverStripe\VendorPlugin;
 
+use Composer\Composer;
 use Composer\Json\JsonFile;
+use Composer\Package\RootPackageInterface;
 use LogicException;
 use SilverStripe\VendorPlugin\Methods\ExposeMethod;
+use Composer\Package\PackageInterface;
 
 /**
  * Represents a module in the vendor folder
@@ -36,15 +39,29 @@ class VendorModule
     protected $name = null;
 
     /**
+     * @var PackageInterface
+     */
+    protected $package = null;
+
+    /**
+     * @var Composer
+     */
+    protected $composer = null;
+
+    /**
      * Build a vendor module library
      *
      * @param string $basePath Project root folder
      * @param string $name Composer name of this library
+     * @param PackageInterface
+     * @param Composer $composer
      */
-    public function __construct($basePath, $name)
+    public function __construct($basePath, $name, $package, $composer)
     {
         $this->basePath = $basePath;
         $this->name = $name;
+        $this->package = $package;
+        $this->composer = $composer;
     }
 
     /**
@@ -65,6 +82,12 @@ class VendorModule
      */
     public function getModulePath($base = self::DEFAULT_SOURCE)
     {
+        if ($this->package instanceof RootPackageInterface && $base === self::DEFAULT_SOURCE) {
+            return Util::joinPaths(
+                $this->basePath,
+                $this->composer->getPackage()->getTargetDir()
+            );
+        }
         return Util::joinPaths(
             $this->basePath,
             $base,
