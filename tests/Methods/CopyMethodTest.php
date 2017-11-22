@@ -3,7 +3,6 @@
 namespace SilverStripe\VendorPlugin\Tests\Methods;
 
 use Composer\Util\Filesystem;
-use Composer\Util\Platform;
 use PHPUnit\Framework\TestCase;
 use SilverStripe\VendorPlugin\Methods\CopyMethod;
 use SilverStripe\VendorPlugin\Methods\SymlinkMethod;

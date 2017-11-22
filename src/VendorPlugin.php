@@ -11,18 +11,16 @@ use Composer\Factory;
 use Composer\Installer\PackageEvent;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
+use Composer\Plugin\Capability\CommandProvider;
+use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
 use Composer\Util\Filesystem;
-use DirectoryIterator;
-use SilverStripe\VendorPlugin\Methods\CopyMethod;
-use SilverStripe\VendorPlugin\Methods\ExposeMethod;
-use SilverStripe\VendorPlugin\Methods\ChainedMethod;
-use SilverStripe\VendorPlugin\Methods\SymlinkMethod;
+use SilverStripe\VendorPlugin\Console\VendorCommandProvider;
 
 /**
  * Provides public webroot rewrite functionality for vendor modules
  */
-class VendorPlugin implements PluginInterface, EventSubscriberInterface
+class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
 {
     /**
      * Module type to match
@@ -43,6 +41,16 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
      * Method name to auto-attempt best method
      */
     const METHOD_AUTO = 'auto';
+
+    /**
+     * File name to use for linking method storage
+     */
+    const METHOD_FILE = '.method';
+
+    /**
+     * Define default as 'auto'
+     */
+    const METHOD_DEFAULT = self::METHOD_AUTO;
 
     /**
      * @var Filesystem
@@ -102,31 +110,15 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
      */
     public function installPackage(PackageEvent $event)
     {
-        // Check and log all folders being exposed
+        // Ensure module exists and has any folders to expose
         $module = $this->getVendorModule($event);
-        if (!$module) {
+        if (!$module || !$module->getExposedFolders()) {
             return;
         }
 
-        // Skip if module has no public resources
-        $folders = $module->getExposedFolders();
-        if (empty($folders)) {
-            return;
-        }
-
-        // Log details
-        $name = $module->getName();
-        $event->getIO()->write("Exposing web directories for module <info>{$name}</info>:");
-        foreach ($folders as $folder) {
-            $event->getIO()->write("  - <info>$folder</info>");
-        }
-
-        // Setup root folder
-        $this->setupResources();
-
-        // Expose web dirs with given method
-        $method = $this->getMethod();
-        $module->exposePaths($method);
+        // Run with task
+        $task = new VendorExposeTask($this->getProjectPath(), $this->filesystem, VendorModule::DEFAULT_TARGET);
+        $task->process($event->getIO(), [$module]);
     }
 
     /**
@@ -135,28 +127,6 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
     protected function getProjectPath()
     {
         return dirname(realpath(Factory::getComposerFile()));
-    }
-
-    /**
-     * Ensure the resources folder is safely created and protected from index.php in root
-     */
-    protected function setupResources()
-    {
-        // Setup root dir
-        $resourcesPath = Util::joinPaths(
-            $this->getProjectPath(),
-            VendorModule::DEFAULT_TARGET
-        );
-        $this->filesystem->ensureDirectoryExists($resourcesPath);
-
-        // Copy missing resources
-        $files = new DirectoryIterator(__DIR__.'/../resources');
-        foreach ($files as $file) {
-            $targetPath = $resourcesPath . DIRECTORY_SEPARATOR . $file->getFilename();
-            if ($file->isFile() && !file_exists($targetPath)) {
-                copy($file->getPathname(), $targetPath);
-            }
-        }
     }
 
     /**
@@ -191,27 +161,6 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
     }
 
     /**
-     * @return ExposeMethod
-     */
-    protected function getMethod()
-    {
-        // Switch based on SS_VENDOR_METHOD arg
-        switch (getenv(self::METHOD_ENV)) {
-            case CopyMethod::NAME:
-                return new CopyMethod();
-            case SymlinkMethod::NAME:
-                return new SymlinkMethod();
-            case self::METHOD_NONE:
-                // 'none' is forced to an empty chain
-                return new ChainedMethod([]);
-            case self::METHOD_AUTO:
-            default:
-                // Default to safe-failover method
-                return new ChainedMethod(new SymlinkMethod(), new CopyMethod());
-        }
-    }
-
-    /**
      * Get target package from operation
      *
      * @param PackageEvent $event
@@ -230,5 +179,12 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface
             return $operation->getPackage();
         }
         return null;
+    }
+
+    public function getCapabilities()
+    {
+        return [
+            CommandProvider::class => VendorCommandProvider::class
+        ];
     }
 }

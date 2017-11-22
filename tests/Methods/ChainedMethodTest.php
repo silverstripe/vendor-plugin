@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use SilverStripe\VendorPlugin\Methods\ChainedMethod;
 use SilverStripe\VendorPlugin\Methods\CopyMethod;
-use SilverStripe\VendorPlugin\Methods\ExposeMethod;
 use SilverStripe\VendorPlugin\Util;
 
 class ChainedMethodTest extends TestCase

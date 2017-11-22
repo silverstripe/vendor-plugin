@@ -50,6 +50,7 @@ class CopyMethod implements ExposeMethod
             return copy($source, $target);
         }
         $it = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
+        /** @var RecursiveDirectoryIterator $ri */
         $ri = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::SELF_FIRST);
         $this->filesystem->ensureDirectoryExists($target);
         $result = true;
