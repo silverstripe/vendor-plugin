@@ -32,37 +32,37 @@ class VendorExposeTask
     protected $filesystem;
 
     /**
-     * Name of resources folder
+     * Path to expose to
      *
      * @var string
      */
-    protected $resourcesFolder;
+    protected $resourcesPath;
 
     /**
      * Construct task for the given base folder
      *
      * @param string $basePath
      * @param Filesystem $filesystem
-     * @param string $resourcesFolder Base name of 'resources' folder
+     * @param string $publicPath Public path to expose to
      */
-    public function __construct($basePath, Filesystem $filesystem, $resourcesFolder)
+    public function __construct($basePath, Filesystem $filesystem, $publicPath)
     {
         $this->basePath = $basePath;
         $this->filesystem = $filesystem;
-        $this->resourcesFolder = $resourcesFolder;
+        $this->resourcesPath = $publicPath;
     }
 
     /**
      * Expose all modules with the given method
      *
      * @param IOInterface $io
-     * @param VendorModule[] $modules
+     * @param Library[] $libraries
      * @param string $methodKey Method key, or null to auto-detect from environment
      */
-    public function process(IOInterface $io, array $modules, $methodKey = null)
+    public function process(IOInterface $io, array $libraries, $methodKey = null)
     {
         // No-op
-        if (empty($modules)) {
+        if (empty($libraries)) {
             return;
         }
 
@@ -76,10 +76,15 @@ class VendorExposeTask
         $method = $this->getMethod($methodKey);
 
         // Update all modules
-        foreach ($modules as $module) {
+        foreach ($libraries as $module) {
+            // Skip this module if no exposure required
+            if (!$module->requiresExpose()) {
+                continue;
+            }
             $name = $module->getName();
+            $type = $module->getType();
             $io->write(
-                "Exposing web directories for module <info>{$name}</info> with method <info>{$methodKey}</info>:"
+                "Exposing web directories for {$type} <info>{$name}</info> with method <info>{$methodKey}</info>:"
             );
             foreach ($module->getExposedFolders() as $folder) {
                 $io->write("  - <info>$folder</info>");
@@ -149,7 +154,6 @@ class VendorExposeTask
         }
     }
 
-
     /**
      * Get 'key' of method to use
      *
@@ -204,9 +208,6 @@ class VendorExposeTask
      */
     protected function getResourcesPath()
     {
-        return Util::joinPaths(
-            $this->basePath,
-            $this->resourcesFolder
-        );
+        return $this->resourcesPath;
     }
 }

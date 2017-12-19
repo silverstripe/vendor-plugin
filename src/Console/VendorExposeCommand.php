@@ -6,9 +6,10 @@ use Composer\Command\BaseCommand;
 use Composer\Factory;
 use Composer\IO\ConsoleIO;
 use Composer\Util\Filesystem;
+use Generator;
+use SilverStripe\VendorPlugin\Library;
 use SilverStripe\VendorPlugin\Util;
 use SilverStripe\VendorPlugin\VendorExposeTask;
-use SilverStripe\VendorPlugin\VendorModule;
 use SilverStripe\VendorPlugin\VendorPlugin;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,7 +23,7 @@ class VendorExposeCommand extends BaseCommand
     public function configure()
     {
         $this->setName('vendor-expose');
-        $this->setDescription('Refresh all exposed vendor module folders');
+        $this->setDescription('Refresh all exposed module/theme/project folders');
         $this->addArgument(
             'method',
             InputArgument::OPTIONAL,
@@ -35,16 +36,19 @@ class VendorExposeCommand extends BaseCommand
     {
         $io = new ConsoleIO($input, $output, $this->getHelperSet());
 
-        // Check modules to expose
-        $modules = $this->getAllModules();
+        // Check libraries to expose
+        $modules = $this->getAllLibraries();
         if (empty($modules)) {
             $io->write("No modules to expose");
             return;
         }
 
+        // Query first library for base destination
+        $basePublicPath = $modules[0]->getBasePublicPath();
+
         // Expose all modules
         $method = $input->getArgument('method');
-        $task = new VendorExposeTask($this->getProjectPath(), new Filesystem(), VendorModule::DEFAULT_TARGET);
+        $task = new VendorExposeTask($this->getProjectPath(), new Filesystem(), $basePublicPath);
         $task->process($io, $modules, $method);
 
         // Success
@@ -52,31 +56,96 @@ class VendorExposeCommand extends BaseCommand
     }
 
     /**
-     * Find all modules
+     * Get all libraries
      *
-     * @return VendorModule[]
+     * @return Library[]
      */
-    protected function getAllModules()
+    protected function getAllLibraries()
     {
         $modules = [];
         $basePath = $this->getProjectPath();
-        $search = Util::joinPaths($basePath, 'vendor', '*', '*');
-        foreach (glob($search, GLOB_ONLYDIR) as $modulePath) {
+
+        // Get all modules
+        foreach ($this->getModulePaths() as $modulePath) {
             // Filter by non-composer folders
             $composerPath = Util::joinPaths($modulePath, 'composer.json');
             if (!file_exists($composerPath)) {
                 continue;
             }
-            // Build module
-            $name = basename($modulePath);
-            $vendor = basename(dirname($modulePath));
-            $module = new VendorModule($basePath, "{$vendor}/{$name}");
-            // Check if this module has folders to expose
-            if ($module->getExposedFolders()) {
-                $modules[] = $module;
+
+            // Ensure this library should be exposed, and has at least one folder
+            $module = new Library($basePath, $modulePath);
+            if (!$module->requiresExpose() || !$module->getExposedFolders()) {
+                continue;
             }
+
+            // Save this module
+            $modules[] = $module;
         }
         return $modules;
+    }
+
+    /**
+     * Find all modules
+     *
+     * @deprecated 1.3..2.0
+     * @return Library[]
+     */
+    protected function getAllModules()
+    {
+        return $this->getAllLibraries();
+    }
+
+    /**
+     * Search all paths that could contain a module / theme
+     *
+     * @return Generator
+     */
+    protected function getModulePaths()
+    {
+        // Project root is always returned
+        $basePath = $this->getProjectPath();
+        yield $basePath;
+
+        // Get vendor modules
+        $search = Util::joinPaths($basePath, 'vendor', '*', '*');
+        foreach (glob($search, GLOB_ONLYDIR) as $modulePath) {
+            if ($this->isPathModule($modulePath)) {
+                yield $modulePath;
+            }
+        }
+
+        // Check if public/ folder exists
+        $publicExists = is_dir(Util::joinPaths($basePath, Library::PUBLIC_PATH));
+        if (!$publicExists) {
+            return;
+        }
+
+        // Search all base folders / modules
+        $search = Util::joinPaths($basePath, '*');
+        foreach (glob($search, GLOB_ONLYDIR) as $modulePath) {
+            if ($this->isPathModule($modulePath)) {
+                yield $modulePath;
+            }
+        }
+
+        // Check all themes
+        $search = Util::joinPaths($basePath, 'themes', '*');
+        foreach (glob($search, GLOB_ONLYDIR) as $themePath) {
+            yield $themePath;
+        }
+    }
+
+    /**
+     * Check if the given path is a silverstripe module
+     *
+     * @param string $path
+     * @return bool
+     */
+    protected function isPathModule($path)
+    {
+        return file_exists(Util::joinPaths($path, '_config'))
+            || file_exists(Util::joinPaths($path, '_config.php'));
     }
 
     /**
