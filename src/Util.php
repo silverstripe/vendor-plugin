@@ -13,6 +13,7 @@ class Util
     public static function joinPaths(...$parts)
     {
         $combined = null;
+        $parts = array_filter($parts);
         array_walk_recursive($parts, function ($part) use (&$combined) {
             // Normalise path
             $part = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $part);
