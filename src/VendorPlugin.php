@@ -9,7 +9,6 @@ use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Factory;
 use Composer\Installer\PackageEvent;
-use Composer\Installers\Installer;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Plugin\Capability\CommandProvider;
