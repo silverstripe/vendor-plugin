@@ -141,12 +141,10 @@ class VendorExposeTask
                 // 'none' is forced to an empty chain
                 return new ChainedMethod([]);
             case VendorPlugin::METHOD_AUTO:
-                // Default to safe-failover method
+                // Default to safe-failover method: try symlink (and junction on Windows), and finally just copy
                 if (Platform::isWindows()) {
-                    // Use junctions on windows environment
-                    return new ChainedMethod(new JunctionMethod(), new CopyMethod());
+                    return new ChainedMethod(new SymlinkMethod(), new JunctionMethod(), new CopyMethod());
                 } else {
-                    // Use symlink on non-windows environments
                     return new ChainedMethod(new SymlinkMethod(), new CopyMethod());
                 }
             default:

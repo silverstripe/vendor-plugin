@@ -45,7 +45,14 @@ class SymlinkMethod implements ExposeMethod
     {
         $success = $this->filesystem->relativeSymlink($source, $target);
         if (!$success) {
-            throw new RuntimeException("Could not create symlink at $target");
+            // Try again with an absolute instead of relative symlink, as relative symlinks are not supported
+            // on some php versions on Windows
+            $success = @symlink($source, $target);
+            if (!$success) {
+                throw new RuntimeException(
+                    "Could not create symlink at $target. Try again running with elevated privileges."
+                );
+            }
         }
     }
 }

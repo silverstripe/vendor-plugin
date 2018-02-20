@@ -45,7 +45,9 @@ If necessary, you can force the behaviour to one of the below using the
   - `copy` - Performs a copy only
   - `symlink` - Performs a symlink only
   - `junction` - Uses a junction (windows only)
-  - `auto` -> Perfrm symlink (or junction on windows), but fail over to copy.
+  - `auto` - Try symlink (and junction on windows), but fail over to copy.
+
+Note: to use `symlink` on Windows, run composer commands with Administrator privileges.
 
 ## Updating all exposed folders
 
