@@ -26,12 +26,14 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
     /**
      * Default module type
      *
-     * @deprecated 1.3..2.0 Use MODULE_FILTER instead
+     * @deprecated 1.3..2.0 No longer used
      */
     const MODULE_TYPE = 'silverstripe-vendormodule';
 
     /**
      * Filter for matching library types to expose
+     *
+     * @deprecated 1.3..2.0 No longer used
      */
     const MODULE_FILTER = '/^silverstripe\-(\w+)$/';
 
@@ -113,7 +115,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
     {
         // Ensure package is the valid type
         $package = $this->getOperationPackage($event);
-        if (!$package || !preg_match(self::MODULE_FILTER, $package->getType())) {
+        if (!$package) {
             return null;
         }
 

@@ -226,11 +226,6 @@ class Library
     {
         $data = $this->getJson();
 
-        // Only expose if correct type
-        if (empty($data['type']) || !preg_match(VendorPlugin::MODULE_FILTER, $data['type'])) {
-            return [];
-        }
-
         // Get all dirs to expose
         if (empty($data['extra']['expose'])) {
             return [];
