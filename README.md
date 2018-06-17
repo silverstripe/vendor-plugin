@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/silverstripe/vendor-plugin.svg?branch=master)](https://travis-ci.org/silverstripe/vendor-plugin)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/silverstripe/vendor-plugin/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/silverstripe/vendor-plugin/?branch=master)
+[![SilverStripe supported module](https://img.shields.io/badge/silverstripe-supported-0071C4.svg)](https://www.silverstripe.org/software/addons/silverstripe-commercially-supported-module-list/)
 
 When installing SilverStripe modules in the vendor directory it may also be necessary
 to ensure certain module assets are exposed to the webroot, as the 'vendor' url prefix
