@@ -21,7 +21,7 @@ class Library
     /**
      * Subfolder to map within public webroot
      */
-    const RESOURCES_PATH = 'resources';
+    const RESOURCES_PATH = '_resources';
 
     /**
      * Project root
@@ -104,7 +104,7 @@ class Library
     /**
      * Get base path to expose all libraries to
      *
-     * @return string Path with no trailing slash E.g. /var/www/public/resources
+     * @return string Path with no trailing slash E.g. /var/www/public/_resources
      */
     public function getBasePublicPath()
     {
@@ -140,7 +140,7 @@ class Library
     /**
      * Get base path to map resources for this module
      *
-     * @return string Path with trimmed slashes. E.g. /var/www/public/resources/vendor/silverstripe/module
+     * @return string Path with trimmed slashes. E.g. /var/www/public/_resources/vendor/silverstripe/module
      */
     public function getPublicPath()
     {

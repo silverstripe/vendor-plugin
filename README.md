@@ -30,7 +30,7 @@ For example, given the below module composer.json:
 ```
 
 This will be installed into the `vendor/tractorcow/anothermodule` folder, and a
-symlink will be created in `resources/tractorcow/anothermodule/client`, allowing
+symlink will be created in `_resources/tractorcow/anothermodule/client`, allowing
 the web server to serve resources from the vendor folder without exposing any
 code or other internal server files.
 

@@ -45,14 +45,14 @@ class CopyMethodTest extends TestCase
     public function testCopy()
     {
         $method = new CopyMethod();
-        $target = Util::joinPaths($this->root, 'resources', 'client');
+        $target = Util::joinPaths($this->root, '_resources', 'client');
         $method->exposeDirectory(
             realpath(__DIR__.'/../fixtures/source/client'),
             $target
         );
 
         // Ensure file exists
-        $this->assertFileExists(Util::joinPaths($this->root, 'resources', 'client', 'subfolder', 'somefile.txt'));
+        $this->assertFileExists(Util::joinPaths($this->root, '_resources', 'client', 'subfolder', 'somefile.txt'));
 
         // Folder is a real folder and not a symlink
         $this->assertFalse($this->filesystem->isSymlinkedDirectory($target));
@@ -67,7 +67,7 @@ class CopyMethodTest extends TestCase
     public function testRecoversFromSymlink()
     {
         $method = new SymlinkMethod();
-        $target = Util::joinPaths($this->root, 'resources', 'client');
+        $target = Util::joinPaths($this->root, '_resources', 'client');
         $method->exposeDirectory(
             realpath(__DIR__.'/../fixtures/source/client'),
             $target

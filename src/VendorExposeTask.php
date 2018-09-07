@@ -111,12 +111,13 @@ class VendorExposeTask
         $this->filesystem->ensureDirectoryExists($resourcesPath);
 
         // Copy missing resources
-        $files = new DirectoryIterator(__DIR__.'/../resources');
+        $resources = Library::RESOURCES_PATH;
+        $files = new DirectoryIterator(__DIR__ . '/../' . $resources);
         foreach ($files as $file) {
             $targetPath = $resourcesPath . DIRECTORY_SEPARATOR . $file->getFilename();
             if ($file->isFile() && !file_exists($targetPath)) {
                 $name = $file->getFilename();
-                $io->write("Writing <info>{$name}</info> to resources folder");
+                $io->write("Writing <info>{$name}</info> to {$resources} folder");
                 copy($file->getPathname(), $targetPath);
             }
         }
@@ -161,7 +162,7 @@ class VendorExposeTask
      */
     protected function getMethodKey()
     {
-        // Switch if `resources/.method` contains a file
+        // Switch if `_resources/.method` contains a file
         $methodFilePath = $this->getMethodFilePath();
         if (file_exists($methodFilePath) && is_readable($methodFilePath)) {
             return trim(file_get_contents($methodFilePath));
@@ -178,7 +179,7 @@ class VendorExposeTask
     }
 
     /**
-     * Persist method key to `resources/.method` to set value
+     * Persist method key to `_resources/.method` to set value
      *
      * @param string $key
      */
@@ -202,7 +203,7 @@ class VendorExposeTask
     }
 
     /**
-     * Path to 'resources' folder
+     * Path to '_resources' folder
      *
      * @return string
      */

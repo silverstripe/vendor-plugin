@@ -86,17 +86,6 @@ class VendorExposeCommand extends BaseCommand
     }
 
     /**
-     * Find all modules
-     *
-     * @deprecated 1.3..2.0
-     * @return Library[]
-     */
-    protected function getAllModules()
-    {
-        return $this->getAllLibraries();
-    }
-
-    /**
      * Search all paths that could contain a module / theme
      *
      * @return Generator
