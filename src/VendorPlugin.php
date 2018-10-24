@@ -15,7 +15,9 @@ use Composer\Plugin\Capability\CommandProvider;
 use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
+use Composer\Semver\Comparator;
 use Composer\Util\Filesystem;
+use M1\Env\Parser;
 use SilverStripe\VendorPlugin\Console\VendorCommandProvider;
 
 /**
@@ -80,6 +82,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
      */
     public function activate(Composer $composer, IOInterface $io)
     {
+        $this->definedResourcesDir($composer);
     }
 
     public static function getSubscribedEvents()
@@ -247,5 +250,43 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
             $library->getBasePublicPath()
         );
         $task->process($IO, [$library]);
+    }
+
+    private function getDotEnvVar($key)
+    {
+        $path = $this->getProjectPath() . DIRECTORY_SEPARATOR . '.env';
+
+        // Not readable
+        if (!file_exists($path) || !is_readable($path)) {
+            return null;
+        }
+
+        // Parse and cleanup content
+        $result = [];
+        $variables = Parser::parse(file_get_contents($path));
+        return isset($variables[$key]) ? $variables[$key] : null;
+    }
+
+    private function definedResourcesDir(Composer $composer)
+    {
+        if (defined('RESOURCES_DIR')) {
+            return;
+        }
+
+        $framework = $composer
+            ->getRepositoryManager()
+            ->getLocalRepository()
+            ->findPackage('silverstripe/framework', '*');
+
+        if ($framework && Comparator::greaterThanOrEqualTo($framework->getVersion(), '4.3')) {
+            $resourcesDir = $this->getDotEnvVar('SS_RESOURCES_DIR');
+            if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
+                $resourcesDir = '_resources';
+            }
+        } else {
+            $resourcesDir = 'resources';
+        }
+
+        define('RESOURCES_DIR', $resourcesDir);
     }
 }
