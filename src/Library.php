@@ -357,7 +357,7 @@ class Library
         } elseif (Comparator::lessThan($frameworkVersion, '4.3'))  {
             // We're definitively running something below 4.3
             $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
-        } else ($ss_resources_dir) {
+        } else {
             // We're confused and will use the value provided by the environement if we can
             $resourcesDir = $ss_resources_dir;
             if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
