@@ -6,6 +6,7 @@ use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Json\JsonFile;
 use Composer\Package\Locker;
+use Composer\Package\Package;
 use Composer\Semver\Comparator;
 use LogicException;
 use M1\Env\Parser;
@@ -104,6 +105,7 @@ class Library
         }
         // Get from composer
         $json = $this->getJson();
+
         if (isset($json['name'])) {
             $this->name = $json['name'];
         }
@@ -318,28 +320,49 @@ class Library
 
     public function getResourcesDir()
     {
+        if (!$this->composer) {
+            throw new LogicException('Could not find the targeted resource dir');
+        }
+
         $locker = $this->getLocker();
+        $ss_resources_dir = $this->getDotEnvVar('SS_RESOURCES_DIR');
 
         if (!$locker) {
             return self::LEGACY_DEFAULT_RESOURCES_DIR;
         }
-        $framework = $locker->getLockedRepository()->findPackage('silverstripe/framework', '*');
-        $frameworVersion = $framework->getPrettyVersion();
-        $aliases = $locker->getAliases();
-        foreach ($aliases as $alias) {
-            if ($alias['package'] === 'silverstripe/framework' && $alias['version'] === $frameworVersion) {
+
+        try {
+            $framework = $locker->getLockedRepository()->findPackage('silverstripe/framework', '*');
+            $frameworkVersion = $framework->getVersion();
+            $aliases = $locker->getAliases();
+        } catch (LogicException $ex) {
+            $framework = $this->composer->getRepositoryManager()->getLocalRepository()->findPackage('silverstripe/framework', '*');
+            $frameworkVersion = $framework->getVersion();
+            $aliases = [];
+        }
+
+       foreach ($aliases as $alias) {
+            if ($alias['package'] === 'silverstripe/framework' && $alias['version'] === $frameworkVersion) {
                 $frameworVersion = isset($alias['alias_normalized']) ? $alias['alias_normalized'] : $alias['alias'];
                 break;
             }
         }
 
-        if ($framework && Comparator::greaterThanOrEqualTo($frameworVersion, '4.3')) {
-            $resourcesDir = $this->getDotEnvVar('SS_RESOURCES_DIR');
+        if (Comparator::greaterThanOrEqualTo($frameworkVersion, '4.3')) {
+            // We're definitively running 4.3 or above
+            $resourcesDir = $ss_resources_dir;
             if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
                 $resourcesDir = self::DEFAULT_RESOURCES_DIR;
             }
-        } else {
+        } elseif (Comparator::lessThan($frameworkVersion, '4.3'))  {
+            // We're definitively running something below 4.3
             $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
+        } else ($ss_resources_dir) {
+            // We're confused and will use the value provided by the environement if we can
+            $resourcesDir = $ss_resources_dir;
+            if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
+                $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
+            }
         }
 
         return $resourcesDir;
@@ -373,10 +396,6 @@ class Library
      */
     private function getLocker()
     {
-        if (!$this->composer) {
-            return null;
-        }
-
         // Some times getLocker will return null, so we can't rely on this
         if ($locker = $this->composer->getLocker()) {
             return $locker;

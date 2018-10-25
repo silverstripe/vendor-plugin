@@ -129,7 +129,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
         $path = $installer->getInstallPath($package);
 
         // Build module
-        return new Library($this->getProjectPath(), $path);
+        return new Library($this->getProjectPath(), $path, null, $event->getComposer(), $event->getIO());
     }
 
     /**
@@ -158,7 +158,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
     {
         // Build library in base path
         $basePath = $this->getProjectPath();
-        $library = new Library($basePath, $basePath);
+        $library = new Library($basePath, $basePath, null, $event->getComposer(), $event->getIO());
 
         // Pass to library installer
         $this->installLibrary($event->getIO(), $library);
