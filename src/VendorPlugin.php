@@ -85,7 +85,6 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
      */
     public function activate(Composer $composer, IOInterface $io)
     {
-        $this->definedResourcesDir($composer, $io);
     }
 
     public static function getSubscribedEvents()
@@ -253,74 +252,5 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
             $library->getBasePublicPath()
         );
         $task->process($IO, [$library]);
-    }
-
-    private function getDotEnvVar($key)
-    {
-        $path = $this->getProjectPath() . DIRECTORY_SEPARATOR . '.env';
-
-        // Not readable
-        if (!file_exists($path) || !is_readable($path)) {
-            return null;
-        }
-
-        // Parse and cleanup content
-        $result = [];
-        $variables = Parser::parse(file_get_contents($path));
-        return isset($variables[$key]) ? $variables[$key] : null;
-    }
-
-    private function definedResourcesDir(Composer $composer, IOInterface $io)
-    {
-        if (defined('RESOURCES_DIR')) {
-            return;
-        }
-
-        $framework = $this->getRepository($composer, $io)
-            ->findPackage('silverstripe/framework', '*');
-
-
-        if ($framework && Comparator::greaterThanOrEqualTo($framework->getVersion(), '4.3')) {
-            $resourcesDir = $this->getDotEnvVar('SS_RESOURCES_DIR');
-            if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
-                $resourcesDir = '_resources';
-            }
-        } else {
-            $resourcesDir = 'resources';
-        }
-
-        define('RESOURCES_DIR', $resourcesDir);
-    }
-
-    /**
-     * Find a Repository to interogate for our package versions. Tries to get it from the locker file first because
-     * this one understand version alias. Fallsback to the local repository
-     * @param Composer $composer
-     * @param IOInterface $io
-     * @return RepositoryInterface
-     */
-    private function getRepository(Composer $composer, IOInterface $io)
-    {
-        // Some times getLocker will return null, so we can't rely on this
-        if ($locker = $composer->getLocker()) {
-            return $locker->getLockedRepository();
-        }
-
-        // Let's build our own locker from the lock file
-        $lockFile = $this->getProjectPath() . DIRECTORY_SEPARATOR . 'composer.lock';
-        if (is_readable($lockFile)) {
-            $locker = new Locker(
-                $io,
-                new JsonFile($lockFile, null, $io),
-                $composer->getRepositoryManager(),
-                $composer->getInstallationManager(),
-                file_get_contents($lockFile)
-            );
-            return $locker->getLockedRepository();
-        }
-
-        // Fallback to LocalRepository
-        return $composer->getRepositoryManager()->getLocalRepository();
-
     }
 }

@@ -2,8 +2,13 @@
 
 namespace SilverStripe\VendorPlugin;
 
+use Composer\Composer;
+use Composer\IO\IOInterface;
 use Composer\Json\JsonFile;
+use Composer\Package\Locker;
+use Composer\Semver\Comparator;
 use LogicException;
+use M1\Env\Parser;
 use SilverStripe\VendorPlugin\Methods\ExposeMethod;
 
 /**
@@ -19,10 +24,20 @@ class Library
     const PUBLIC_PATH = 'public';
 
     /**
-     * Subfolder to map within public webroot
-     * @deprecated 1.4.0:2.0.0 Use global constant RESOURCES_DIR instead.
+     * Default folder where vendor resources will be exposed.
      */
-    const RESOURCES_PATH = RESOURCES_DIR;
+    const DEFAULT_RESOURCES_DIR = '_resources';
+
+    /**
+     * Default folder where vendor resources will be exposed if using pre-4.3 framework.
+     */
+    const LEGACY_DEFAULT_RESOURCES_DIR = 'resources';
+
+    /**
+     * Subfolder to map within public webroot
+     * @deprecated 1.4.0:2.0.0 Use Library::getResourceDir() instead.
+     */
+    const RESOURCES_PATH = self::LEGACY_DEFAULT_RESOURCES_DIR;
 
     /**
      * Project root
@@ -39,17 +54,35 @@ class Library
     protected $path = null;
 
     /**
+     * @var Composer
+     */
+    protected $composer = null;
+
+    /**
+     * @var IOInterface
+     */
+    protected $io = null;
+
+    /**
      * Build a vendor module library
      *
      * @param string $basePath Project root folder
      * @param string $libraryPath Path to this library
      * @param string $name Composer name of this library
      */
-    public function __construct($basePath, $libraryPath, $name = null)
+    public function __construct(
+        $basePath,
+        $libraryPath,
+        $name = null,
+        Composer $composer=null,
+        IOInterface $io = null
+    )
     {
         $this->basePath = realpath($basePath);
         $this->path = realpath($libraryPath);
         $this->name = $name;
+        $this->composer = $composer;
+        $this->io = $io;
     }
 
     /**
@@ -110,9 +143,10 @@ class Library
     public function getBasePublicPath()
     {
         $projectPath = $this->getBasePath();
+        $resourceDir = $this->getResourcesDir();
         $publicPath = $this->publicPathExists()
-            ? Util::joinPaths($projectPath, self::PUBLIC_PATH, RESOURCES_DIR)
-            : Util::joinPaths($projectPath, RESOURCES_DIR);
+            ? Util::joinPaths($projectPath, self::PUBLIC_PATH, $resourceDir)
+            : Util::joinPaths($projectPath, $resourceDir);
         return $publicPath;
     }
 
@@ -280,5 +314,87 @@ class Library
     protected function installedIntoVendor()
     {
         return preg_match('#^vendor[/\\\\]#', $this->getRelativePath());
+    }
+
+    public function getResourcesDir()
+    {
+        $locker = $this->getLocker();
+
+        if (!$locker) {
+            return self::LEGACY_DEFAULT_RESOURCES_DIR;
+        }
+        $framework = $locker->getLockedRepository()->findPackage('silverstripe/framework', '*');
+        $frameworVersion = $framework->getPrettyVersion();
+        $aliases = $locker->getAliases();
+        foreach ($aliases as $alias) {
+            if ($alias['package'] === 'silverstripe/framework' && $alias['version'] === $frameworVersion) {
+                $frameworVersion = isset($alias['alias_normalized']) ? $alias['alias_normalized'] : $alias['alias'];
+                break;
+            }
+        }
+
+        if ($framework && Comparator::greaterThanOrEqualTo($frameworVersion, '4.3')) {
+            $resourcesDir = $this->getDotEnvVar('SS_RESOURCES_DIR');
+            if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
+                $resourcesDir = self::DEFAULT_RESOURCES_DIR;
+            }
+        } else {
+            $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
+        }
+
+        return $resourcesDir;
+    }
+
+    private function getDotEnvVar($key)
+    {
+        if ($env = getenv($key)) {
+            return $env;
+        }
+
+        $path = $this->getBasePath() . DIRECTORY_SEPARATOR . '.env';
+
+        // Not readable
+        if (!file_exists($path) || !is_readable($path)) {
+            return null;
+        }
+
+        // Parse and cleanup content
+        $result = [];
+        $variables = Parser::parse(file_get_contents($path));
+        return isset($variables[$key]) ? $variables[$key] : null;
+    }
+
+    /**
+     * Find a Repository to interogate for our package versions. Tries to get it from the locker file first because
+     * this one understand version alias. Fallsback to the local repository
+     * @param Composer $composer
+     * @param IOInterface $io
+     * @return Locker
+     */
+    private function getLocker()
+    {
+        if (!$this->composer) {
+            return null;
+        }
+
+        // Some times getLocker will return null, so we can't rely on this
+        if ($locker = $this->composer->getLocker()) {
+            return $locker;
+        }
+
+        // Let's build our own locker from the lock file
+        $lockFile = $this->getBasePath() . DIRECTORY_SEPARATOR . 'composer.lock';
+        if ($this->io && is_readable($lockFile)) {
+            $locker = new Locker(
+                $this->io,
+                new JsonFile($lockFile, null, $this->io),
+                $this->composer->getRepositoryManager(),
+                $this->composer->getInstallationManager(),
+                file_get_contents($lockFile)
+            );
+            return $locker;
+        }
+
+        return null;
     }
 }
