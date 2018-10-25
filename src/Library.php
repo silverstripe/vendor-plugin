@@ -318,33 +318,48 @@ class Library
         return preg_match('#^vendor[/\\\\]#', $this->getRelativePath());
     }
 
+    /**
+     * Determine the name of the folder where vendor module's resources will be exposed. e.g. `_resources`
+     * @throws LogicException
+     * @return string
+     */
     public function getResourcesDir()
     {
         if (!$this->composer) {
-            throw new LogicException('Could not find the targeted resource dir');
+            // We need a composer instance for this to work.
+            throw new LogicException('Could not find the targeted resource dir.');
         }
 
-        $locker = $this->getLocker();
+        // Try to get our resource dir from our .env file
         $ss_resources_dir = $this->getDotEnvVar('SS_RESOURCES_DIR');
 
-        if (!$locker) {
-            return self::LEGACY_DEFAULT_RESOURCES_DIR;
-        }
+        $frameworkVersion = '';
 
-        try {
-            $framework = $locker->getLockedRepository()->findPackage('silverstripe/framework', '*');
-            $frameworkVersion = $framework->getVersion();
-            $aliases = $locker->getAliases();
-        } catch (LogicException $ex) {
-            $framework = $this->composer->getRepositoryManager()->getLocalRepository()->findPackage('silverstripe/framework', '*');
-            $frameworkVersion = $framework->getVersion();
-            $aliases = [];
-        }
+        if ($locker = $this->getLocker()) {
+            try {
+                // Try to get our package info from the locker
+                $framework = $locker
+                    ->getLockedRepository()
+                    ->findPackage('silverstripe/framework', '*');
+                $aliases = $locker->getAliases();
+            } catch (LogicException $ex) {
+                // Fallback to the local repo, this won't allow us to get our aliases however.
+                $framework = $this->composer
+                    ->getRepositoryManager()
+                    ->getLocalRepository()
+                    ->findPackage('silverstripe/framework', '*');
+                $aliases = [];
+            }
 
-       foreach ($aliases as $alias) {
-            if ($alias['package'] === 'silverstripe/framework' && $alias['version'] === $frameworkVersion) {
-                $frameworVersion = isset($alias['alias_normalized']) ? $alias['alias_normalized'] : $alias['alias'];
-                break;
+            $frameworkVersion = $framework->getVersion();
+
+            // If we're running off a dev branch of framework, we might not get a clean version number.
+            // So we'll try to match it to an alias
+            foreach ($aliases as $alias) {
+                if ($alias['package'] === 'silverstripe/framework' && $alias['version'] === $frameworkVersion) {
+                    $frameworkVersion = isset($alias['alias_normalized']) ? $alias['alias_normalized'] : $alias['alias'];
+                    break;
+                }
             }
         }
 
@@ -358,7 +373,7 @@ class Library
             // We're definitively running something below 4.3
             $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
         } else {
-            // We're confused and will use the value provided by the environement if we can
+            // We're confused ... if we'll use the value from the .env file or we'll default to legacy.
             $resourcesDir = $ss_resources_dir;
             if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
                 $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
@@ -368,6 +383,12 @@ class Library
         return $resourcesDir;
     }
 
+    /**
+     * Find a value from the environment.
+     *
+     * @param $key
+     * @return string|null
+     */
     private function getDotEnvVar($key)
     {
         if ($env = getenv($key)) {
