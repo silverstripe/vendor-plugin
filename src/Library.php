@@ -30,7 +30,7 @@ class Library
     const DEFAULT_RESOURCES_DIR = '_resources';
 
     /**
-     * Default folder where vendor resources will be exposed if using pre-4.3 framework.
+     * Default folder where vendor resources will be exposed if using a non-configurable framework
      */
     const LEGACY_DEFAULT_RESOURCES_DIR = 'resources';
 
@@ -39,6 +39,11 @@ class Library
      * @deprecated 1.4.0:2.0.0 Use Library::getResourceDir() instead.
      */
     const RESOURCES_PATH = self::LEGACY_DEFAULT_RESOURCES_DIR;
+
+    /**
+     * Version of `silverstripe/framework` from which
+     */
+    const CONFIGURABLE_FRAMEWORK_VERSION = "4.3.0";
 
     /**
      * Project root
@@ -363,17 +368,17 @@ class Library
             }
         }
 
-        if (Comparator::greaterThanOrEqualTo($frameworkVersion, '4.3')) {
-            // We're definitively running 4.3 or above
+        if (Comparator::greaterThanOrEqualTo($frameworkVersion, self::CONFIGURABLE_FRAMEWORK_VERSION)) {
+            // We're definitively running a framework that supports a configurable resources folder
             $resourcesDir = $ss_resources_dir;
             if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
                 $resourcesDir = self::DEFAULT_RESOURCES_DIR;
             }
-        } elseif (Comparator::lessThan($frameworkVersion, '4.3'))  {
-            // We're definitively running something below 4.3
+        } elseif (Comparator::lessThan($frameworkVersion, self::CONFIGURABLE_FRAMEWORK_VERSION))  {
+            // We're definitively running a framework that DOES NOT supports a configurable resources folder
             $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
         } else {
-            // We're confused ... if we'll use the value from the .env file or we'll default to legacy.
+            // We're confused ... we'll try using the value from the .env file or we'll default to legacy.
             $resourcesDir = $ss_resources_dir;
             if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
                 $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
