@@ -43,7 +43,7 @@ class Library
     /**
      * Version of `silverstripe/framework` from which
      */
-    const CONFIGURABLE_FRAMEWORK_VERSION = "4.3.0";
+    const CONFIGURABLE_FRAMEWORK_VERSION = "4.4.0";
 
     /**
      * Project root
@@ -331,7 +331,7 @@ class Library
     public function getResourcesDir()
     {
         if (!$this->composer) {
-            // We need a composer instance for this to work.
+            // We need a composer instance for this to work. This should never happen.
             throw new LogicException('Could not find the targeted resource dir.');
         }
 
@@ -366,6 +366,17 @@ class Library
                     break;
                 }
             }
+        } elseif ($repo = $this->composer->getRepositoryManager()->getLocalRepository()) {
+            $framework = $repo->findPackage('silverstripe/framework', '*');
+            $frameworkVersion = $framework->getVersion();
+        }
+
+        if (!$frameworkVersion) {
+            throw new LogicException(
+                'Could not find the targeted resource dir. SilverStripe Framework does not appear to be' .
+                'installed. Try running a `composer update`. If the error persist, please report this issue at ' .
+                'https://github.com/silverstripe/vendor-plugin/issues/new'
+            );
         }
 
         if (Comparator::greaterThanOrEqualTo($frameworkVersion, self::CONFIGURABLE_FRAMEWORK_VERSION)) {
