@@ -35,7 +35,6 @@ class LibraryTest extends TestCase
     {
         parent::tearDown();
         chdir($this->cwd);
-
     }
 
     /**
@@ -71,7 +70,7 @@ class LibraryTest extends TestCase
 
 
         $io = new NullIO();
-        $composer = $factory->createComposer($io,null, false, $path);
+        $composer = $factory->createComposer($io, null, false, $path);
         $preloadLock && $composer->setLocker(new Locker(
             $io,
             new JsonFile($path . '/composer.lock', null, $io),
@@ -90,6 +89,4 @@ class LibraryTest extends TestCase
 
         return $lib;
     }
-
-
 }

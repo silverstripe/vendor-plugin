@@ -80,10 +80,9 @@ class Library
         $basePath,
         $libraryPath,
         $name = null,
-        Composer $composer=null,
+        Composer $composer = null,
         IOInterface $io = null
-    )
-    {
+    ) {
         $this->basePath = realpath($basePath);
         $this->path = realpath($libraryPath);
         $this->name = $name;
@@ -362,7 +361,9 @@ class Library
             // So we'll try to match it to an alias
             foreach ($aliases as $alias) {
                 if ($alias['package'] === 'silverstripe/framework' && $alias['version'] === $frameworkVersion) {
-                    $frameworkVersion = isset($alias['alias_normalized']) ? $alias['alias_normalized'] : $alias['alias'];
+                    $frameworkVersion = isset($alias['alias_normalized'])
+                        ? $alias['alias_normalized']
+                        : $alias['alias'];
                     break;
                 }
             }
@@ -385,7 +386,7 @@ class Library
             if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
                 $resourcesDir = self::DEFAULT_RESOURCES_DIR;
             }
-        } elseif (Comparator::lessThan($frameworkVersion, self::CONFIGURABLE_FRAMEWORK_VERSION))  {
+        } elseif (Comparator::lessThan($frameworkVersion, self::CONFIGURABLE_FRAMEWORK_VERSION)) {
             // We're definitively running a framework that DOES NOT supports a configurable resources folder
             $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
         } else {
