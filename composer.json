@@ -28,8 +28,7 @@
     "minimum-stability": "dev",
     "require": {
         "composer/installers": "^1.4",
-        "composer-plugin-api": "^1.1",
-        "m1/env": "^2.1"
+        "composer-plugin-api": "^1.1"
     },
     "require-dev": {
         "composer/composer": "^1.5",

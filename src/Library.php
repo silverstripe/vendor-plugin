@@ -335,7 +335,8 @@ class Library
         }
 
         // Try to get our resource dir from our .env file
-        $ss_resources_dir = $this->getDotEnvVar('SS_RESOURCES_DIR');
+        $extras = $this->composer->getPackage()->getExtra();
+        $resourcesDirOverride = isset($extras['resources-dir']) ? $extras['resources-dir'] : '';
 
         $frameworkVersion = '';
 
@@ -347,12 +348,12 @@ class Library
                     ->findPackage('silverstripe/framework', '*');
                 $aliases = $locker->getAliases();
             } catch (LogicException $ex) {
-                // Fallback to the local repo, this won't allow us to get our aliases however.
+                // Fallback to the local repo
                 $framework = $this->composer
                     ->getRepositoryManager()
                     ->getLocalRepository()
                     ->findPackage('silverstripe/framework', '*');
-                $aliases = [];
+                $aliases = $this->composer->getPackage()->getAliases();
             }
 
             $frameworkVersion = $framework->getVersion();
@@ -382,7 +383,7 @@ class Library
 
         if (Comparator::greaterThanOrEqualTo($frameworkVersion, self::CONFIGURABLE_FRAMEWORK_VERSION)) {
             // We're definitively running a framework that supports a configurable resources folder
-            $resourcesDir = $ss_resources_dir;
+            $resourcesDir = $resourcesDirOverride;
             if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
                 $resourcesDir = self::DEFAULT_RESOURCES_DIR;
             }
@@ -391,38 +392,13 @@ class Library
             $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
         } else {
             // We're confused ... we'll try using the value from the .env file or we'll default to legacy.
-            $resourcesDir = $ss_resources_dir;
+            $resourcesDir = $resourcesDirOverride;
             if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
                 $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
             }
         }
 
         return $resourcesDir;
-    }
-
-    /**
-     * Find a value from the environment.
-     *
-     * @param $key
-     * @return string|null
-     */
-    private function getDotEnvVar($key)
-    {
-        if ($env = getenv($key)) {
-            return $env;
-        }
-
-        $path = $this->getBasePath() . DIRECTORY_SEPARATOR . '.env';
-
-        // Not readable
-        if (!file_exists($path) || !is_readable($path)) {
-            return null;
-        }
-
-        // Parse and cleanup content
-        $result = [];
-        $variables = Parser::parse(file_get_contents($path));
-        return isset($variables[$key]) ? $variables[$key] : null;
     }
 
     /**

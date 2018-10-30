@@ -40,10 +40,8 @@ class LibraryTest extends TestCase
     /**
      * @dataProvider resourcesDirProvider
      */
-    public function testResourcesDir($expected, $projectPath, $env, $preloadLock)
+    public function testResourcesDir($expected, $projectPath, $preloadLock)
     {
-        putenv('SS_RESOURCES_DIR=' . $env);
-
         $lib = $this->getLib($projectPath, $preloadLock);
         $this->assertEquals($expected, $lib->getResourcesDir());
     }
@@ -51,17 +49,21 @@ class LibraryTest extends TestCase
     public function resourcesDirProvider()
     {
         return [
-            ['resources', 'ss43', '', false],
-            ['_resources', 'ss44', '', false],
-            ['etc', 'ss44', 'etc', false],
-            ['resources', 'ss43', 'etc', false],
-            ['resources', 'ss43', '', true],
-            ['_resources', 'ss44', '', true],
-            ['etc', 'ss44', 'etc', true],
-            ['environement-defined', 'ss44WithEnv', '', true],
+            ['resources', 'ss43', false],
+            ['_resources', 'ss44', false],
+            ['customised-resources-dir', 'ss44WithCustomResourcesDir', false],
+            ['resources', 'ss43', true],
+            ['_resources', 'ss44', true],
+            ['customised-resources-dir', 'ss44WithCustomResourcesDir', true],
         ];
     }
 
+    /**
+     * Get a library for the provided project
+     * @param string $project name of the project folder in the fixtures directory
+     * @param bool $preloadLock Whatever to preload the lock file or let Library do that for us
+     * @return Library
+     */
     private function getLib($project, $preloadLock)
     {
         $path = __DIR__ . '/fixtures/projects/' . $project;
