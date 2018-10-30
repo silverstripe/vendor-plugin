@@ -16,9 +16,9 @@ class VendorModule extends Library
 
     /**
      * Default replacement folder for 'vendor'
-     * @deprecated 1.4.0:2.0.0 Use global RESOURCES_DIR instead.
+     * @deprecated 1.4.0:2.0.0 Use global `Library::getResourcesDir()` instead.
      */
-    const DEFAULT_TARGET = RESOURCES_DIR;
+    const DEFAULT_TARGET = 'resources';
 
     /**
      * Build a vendor module library
@@ -43,7 +43,7 @@ class VendorModule extends Library
      * @param string $base Rewrite root (or 'vendor' for actual module path)
      * @return string Path for this module
      */
-    public function getModulePath($base = RESOURCES_DIR)
+    public function getModulePath($base = self::DEFAULT_SOURCE)
     {
         if ($base === self::DEFAULT_TARGET) {
             return $this->getPublicPath();
