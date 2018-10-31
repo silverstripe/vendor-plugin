@@ -2,13 +2,8 @@
 
 namespace SilverStripe\VendorPlugin;
 
-use Composer\Composer;
-use Composer\IO\IOInterface;
 use Composer\IO\NullIO;
 use Composer\Json\JsonFile;
-use Composer\Package\Locker;
-use Composer\Package\Package;
-use Composer\Semver\Comparator;
 use LogicException;
 use SilverStripe\VendorPlugin\Methods\ExposeMethod;
 
@@ -50,11 +45,6 @@ class Library
     protected $path = null;
 
     /**
-     * @var Composer
-     */
-    protected $composer = null;
-
-    /**
      * Build a vendor module library
      *
      * @param string $basePath Project root folder
@@ -64,9 +54,7 @@ class Library
     public function __construct(
         $basePath,
         $libraryPath,
-        $name = null,
-        Composer $composer = null,
-        IOInterface $io = null
+        $name = null
     ) {
         $this->basePath = realpath($basePath);
         $this->path = realpath($libraryPath);

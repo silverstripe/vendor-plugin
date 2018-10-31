@@ -2,12 +2,6 @@
 
 namespace SilverStripe\VendorPlugin\Tests\Methods;
 
-use Composer\Composer;
-use Composer\Factory;
-use Composer\IO\NullIO;
-use Composer\Json\JsonFile;
-use Composer\Package\Locker;
-use Composer\Repository\RepositoryManager;
 use PHPUnit\Framework\TestCase;
 use SilverStripe\VendorPlugin\Library;
 
@@ -19,7 +13,7 @@ class LibraryTest extends TestCase
     public function testResourcesDir($expected, $projectPath)
     {
         $path = __DIR__ . '/fixtures/projects/' . $projectPath;
-        $lib = new Library($path,'vendor/silverstripe/skynet');
+        $lib = new Library($path, 'vendor/silverstripe/skynet');
         $this->assertEquals($expected, $lib->getResourcesDir());
     }
 
@@ -36,7 +30,7 @@ class LibraryTest extends TestCase
     {
         $this->expectException(\LogicException::class);
         $path = __DIR__ . '/fixtures/projects/ss44InvalidResourcesDir';
-        $lib = new Library($path,'vendor/silverstripe/skynet');
+        $lib = new Library($path, 'vendor/silverstripe/skynet');
         $lib->getResourcesDir();
     }
 }

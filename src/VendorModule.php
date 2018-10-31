@@ -16,7 +16,6 @@ class VendorModule extends Library
 
     /**
      * Default replacement folder for 'vendor'
-     * @deprecated 1.4.0:2.0.0 Use global `Library::getResourcesDir()` instead.
      */
     const DEFAULT_TARGET = 'resources';
 

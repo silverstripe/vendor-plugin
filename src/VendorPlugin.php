@@ -10,17 +10,12 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Factory;
 use Composer\Installer\PackageEvent;
 use Composer\IO\IOInterface;
-use Composer\Json\JsonFile;
-use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Plugin\Capability\CommandProvider;
 use Composer\Plugin\Capable;
 use Composer\Plugin\PluginInterface;
-use Composer\Repository\RepositoryInterface;
 use Composer\Script\Event;
-use Composer\Semver\Comparator;
 use Composer\Util\Filesystem;
-use M1\Env\Parser;
 use SilverStripe\VendorPlugin\Console\VendorCommandProvider;
 
 /**
