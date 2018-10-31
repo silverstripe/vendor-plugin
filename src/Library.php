@@ -4,12 +4,12 @@ namespace SilverStripe\VendorPlugin;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
+use Composer\IO\NullIO;
 use Composer\Json\JsonFile;
 use Composer\Package\Locker;
 use Composer\Package\Package;
 use Composer\Semver\Comparator;
 use LogicException;
-use M1\Env\Parser;
 use SilverStripe\VendorPlugin\Methods\ExposeMethod;
 
 /**
@@ -27,23 +27,13 @@ class Library
     /**
      * Default folder where vendor resources will be exposed.
      */
-    const DEFAULT_RESOURCES_DIR = '_resources';
-
-    /**
-     * Default folder where vendor resources will be exposed if using a non-configurable framework
-     */
-    const LEGACY_DEFAULT_RESOURCES_DIR = 'resources';
+    const DEFAULT_RESOURCES_DIR = 'resources';
 
     /**
      * Subfolder to map within public webroot
-     * @deprecated 1.4.0:2.0.0 Use Library::getResourceDir() instead.
+     * @deprecated 1.4.0..2.0.0 Use Library::getResourcesDir() instead
      */
-    const RESOURCES_PATH = self::LEGACY_DEFAULT_RESOURCES_DIR;
-
-    /**
-     * Version of `silverstripe/framework` from which
-     */
-    const CONFIGURABLE_FRAMEWORK_VERSION = "4.4.0";
+    const RESOURCES_PATH = self::DEFAULT_RESOURCES_DIR;
 
     /**
      * Project root
@@ -65,11 +55,6 @@ class Library
     protected $composer = null;
 
     /**
-     * @var IOInterface
-     */
-    protected $io = null;
-
-    /**
      * Build a vendor module library
      *
      * @param string $basePath Project root folder
@@ -86,8 +71,6 @@ class Library
         $this->basePath = realpath($basePath);
         $this->path = realpath($libraryPath);
         $this->name = $name;
-        $this->composer = $composer;
-        $this->io = $io;
     }
 
     /**
@@ -329,105 +312,27 @@ class Library
      */
     public function getResourcesDir()
     {
-        if (!$this->composer) {
-            // We need a composer instance for this to work. This should never happen.
-            throw new LogicException('Could not find the targeted resource dir.');
+        $rootComposerFile = $this->getBasePath() . '/composer.json';
+        $rootProject = new JsonFile($rootComposerFile, null, new NullIO());
+
+        if (!$rootProject->exists()) {
+            return self::DEFAULT_RESOURCES_DIR;
         }
 
-        // Try to get our resource dir from our .env file
-        $extras = $this->composer->getPackage()->getExtra();
-        $resourcesDirOverride = isset($extras['resources-dir']) ? $extras['resources-dir'] : '';
+        $rootProjectData = $rootProject->read();
+        $resourcesDir = isset($rootProjectData['extra']['resources-dir'])
+            ? $rootProjectData['extra']['resources-dir']
+            : self::DEFAULT_RESOURCES_DIR;
 
-        $frameworkVersion = '';
 
-        if ($locker = $this->getLocker()) {
-            try {
-                // Try to get our package info from the locker
-                $framework = $locker
-                    ->getLockedRepository()
-                    ->findPackage('silverstripe/framework', '*');
-                $aliases = $locker->getAliases();
-            } catch (LogicException $ex) {
-                // Fallback to the local repo
-                $framework = $this->composer
-                    ->getRepositoryManager()
-                    ->getLocalRepository()
-                    ->findPackage('silverstripe/framework', '*');
-                $aliases = $this->composer->getPackage()->getAliases();
-            }
-
-            $frameworkVersion = $framework->getVersion();
-
-            // If we're running off a dev branch of framework, we might not get a clean version number.
-            // So we'll try to match it to an alias
-            foreach ($aliases as $alias) {
-                if ($alias['package'] === 'silverstripe/framework' && $alias['version'] === $frameworkVersion) {
-                    $frameworkVersion = isset($alias['alias_normalized'])
-                        ? $alias['alias_normalized']
-                        : $alias['alias'];
-                    break;
-                }
-            }
-        } elseif ($repo = $this->composer->getRepositoryManager()->getLocalRepository()) {
-            $framework = $repo->findPackage('silverstripe/framework', '*');
-            $frameworkVersion = $framework->getVersion();
+        if (preg_match('/^[_\-a-z0-9]+$/i', $resourcesDir)) {
+            return $resourcesDir;
         }
 
-        if (!$frameworkVersion) {
-            throw new LogicException(
-                'Could not find the targeted resource dir. SilverStripe Framework does not appear to be' .
-                'installed. Try running a `composer update`. If the error persist, please report this issue at ' .
-                'https://github.com/silverstripe/vendor-plugin/issues/new'
-            );
-        }
-
-        if (Comparator::greaterThanOrEqualTo($frameworkVersion, self::CONFIGURABLE_FRAMEWORK_VERSION)) {
-            // We're definitively running a framework that supports a configurable resources folder
-            $resourcesDir = $resourcesDirOverride;
-            if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
-                $resourcesDir = self::DEFAULT_RESOURCES_DIR;
-            }
-        } elseif (Comparator::lessThan($frameworkVersion, self::CONFIGURABLE_FRAMEWORK_VERSION)) {
-            // We're definitively running a framework that DOES NOT supports a configurable resources folder
-            $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
-        } else {
-            // We're confused ... we'll try using the value from the .env file or we'll default to legacy.
-            $resourcesDir = $resourcesDirOverride;
-            if (!preg_match('/[_\-a-z0-9]+/i', $resourcesDir)) {
-                $resourcesDir = self::LEGACY_DEFAULT_RESOURCES_DIR;
-            }
-        }
-
-        return $resourcesDir;
-    }
-
-    /**
-     * Find a Repository to interogate for our package versions. Tries to get it from the locker file first because
-     * this one understand version alias. Fallsback to the local repository
-     * @param Composer $composer
-     * @param IOInterface $io
-     * @return Locker
-     */
-    private function getLocker()
-    {
-        // Some times getLocker will return null, so we can't rely on this
-        if ($locker = $this->composer->getLocker()) {
-            return $locker;
-        }
-
-        // Let's build our own locker from the lock file
-        $lockFile = $this->getBasePath() . DIRECTORY_SEPARATOR . 'composer.lock';
-        if ($this->io && is_readable($lockFile)) {
-            $locker = new Locker(
-                $this->io,
-                new JsonFile($lockFile, null, $this->io),
-                $this->composer->getRepositoryManager(),
-                $this->composer->getInstallationManager(),
-                file_get_contents($lockFile)
-            );
-            return $locker;
-        }
-
-        return null;
+        throw new LogicException(sprintf(
+            'Resources dir error: "%s" is not a valid resources directory name. Update the ' .
+            '`extra.resources-dir` key in your composer.json file',
+            $resourcesDir
+        ));
     }
 }

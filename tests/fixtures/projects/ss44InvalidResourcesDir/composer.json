@@ -22,7 +22,7 @@
             "install.php",
             "web.config"
         ],
-        "resources-dir": "_resources"
+        "resources-dir": "Vendor plugin will throw a !$%^#$!#$!&^# fit!!!"
     },
     "prefer-stable": true,
     "minimum-stability": "dev"

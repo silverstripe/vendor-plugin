@@ -74,7 +74,7 @@ class VendorExposeCommand extends BaseCommand
             }
 
             // Ensure this library should be exposed, and has at least one folder
-            $module = new Library($basePath, $modulePath, null, $this->getComposer(), $this->getIO());
+            $module = new Library($basePath, $modulePath);
             if (!$module->requiresExpose() || !$module->getExposedFolders()) {
                 continue;
             }
