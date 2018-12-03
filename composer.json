@@ -18,7 +18,7 @@
     "extra": {
         "class": "SilverStripe\\VendorPlugin\\VendorPlugin",
         "branch-alias": {
-            "1.x-dev": "1.3.x-dev"
+            "1.x-dev": "1.4.x-dev"
         }
     },
     "scripts": {
