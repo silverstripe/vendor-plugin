@@ -2,6 +2,7 @@
 
 namespace SilverStripe\VendorPlugin;
 
+use Composer\IO\NullIO;
 use Composer\Json\JsonFile;
 use LogicException;
 use SilverStripe\VendorPlugin\Methods\ExposeMethod;
@@ -19,9 +20,15 @@ class Library
     const PUBLIC_PATH = 'public';
 
     /**
-     * Subfolder to map within public webroot
+     * Default folder where vendor resources will be exposed.
      */
-    const RESOURCES_PATH = 'resources';
+    const DEFAULT_RESOURCES_DIR = 'resources';
+
+    /**
+     * Subfolder to map within public webroot
+     * @deprecated 1.4.0..2.0.0 Use Library::getResourcesDir() instead
+     */
+    const RESOURCES_PATH = self::DEFAULT_RESOURCES_DIR;
 
     /**
      * Project root
@@ -44,8 +51,11 @@ class Library
      * @param string $libraryPath Path to this library
      * @param string $name Composer name of this library
      */
-    public function __construct($basePath, $libraryPath, $name = null)
-    {
+    public function __construct(
+        $basePath,
+        $libraryPath,
+        $name = null
+    ) {
         $this->basePath = realpath($basePath);
         $this->path = realpath($libraryPath);
         $this->name = $name;
@@ -70,6 +80,7 @@ class Library
         }
         // Get from composer
         $json = $this->getJson();
+
         if (isset($json['name'])) {
             $this->name = $json['name'];
         }
@@ -104,14 +115,15 @@ class Library
     /**
      * Get base path to expose all libraries to
      *
-     * @return string Path with no trailing slash E.g. /var/www/public/resources
+     * @return string Path with no trailing slash E.g. /var/www/public/_resources
      */
     public function getBasePublicPath()
     {
         $projectPath = $this->getBasePath();
+        $resourceDir = $this->getResourcesDir();
         $publicPath = $this->publicPathExists()
-            ? Util::joinPaths($projectPath, self::PUBLIC_PATH, self::RESOURCES_PATH)
-            : Util::joinPaths($projectPath, self::RESOURCES_PATH);
+            ? Util::joinPaths($projectPath, self::PUBLIC_PATH, $resourceDir)
+            : Util::joinPaths($projectPath, $resourceDir);
         return $publicPath;
     }
 
@@ -140,7 +152,7 @@ class Library
     /**
      * Get base path to map resources for this module
      *
-     * @return string Path with trimmed slashes. E.g. /var/www/public/resources/vendor/silverstripe/module
+     * @return string Path with trimmed slashes. E.g. /var/www/public/_resources/vendor/silverstripe/module
      */
     public function getPublicPath()
     {
@@ -279,5 +291,36 @@ class Library
     protected function installedIntoVendor()
     {
         return preg_match('#^vendor[/\\\\]#', $this->getRelativePath());
+    }
+
+    /**
+     * Determine the name of the folder where vendor module's resources will be exposed. e.g. `_resources`
+     * @throws LogicException
+     * @return string
+     */
+    public function getResourcesDir()
+    {
+        $rootComposerFile = $this->getBasePath() . '/composer.json';
+        $rootProject = new JsonFile($rootComposerFile, null, new NullIO());
+
+        if (!$rootProject->exists()) {
+            return self::DEFAULT_RESOURCES_DIR;
+        }
+
+        $rootProjectData = $rootProject->read();
+        $resourcesDir = isset($rootProjectData['extra']['resources-dir'])
+            ? $rootProjectData['extra']['resources-dir']
+            : self::DEFAULT_RESOURCES_DIR;
+
+
+        if (preg_match('/^[_\-a-z0-9]+$/i', $resourcesDir)) {
+            return $resourcesDir;
+        }
+
+        throw new LogicException(sprintf(
+            'Resources dir error: "%s" is not a valid resources directory name. Update the ' .
+            '`extra.resources-dir` key in your composer.json file',
+            $resourcesDir
+        ));
     }
 }
