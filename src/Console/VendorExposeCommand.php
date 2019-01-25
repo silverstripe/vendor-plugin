@@ -27,7 +27,7 @@ class VendorExposeCommand extends BaseCommand
         $this->addArgument(
             'method',
             InputArgument::OPTIONAL,
-            'Optional method to use. Defaults to last used value, or ' . VendorPlugin::METHOD_DEFAULT . ' otherwise.'
+            'Optional method to use. Defaults to last used value, or "' . VendorPlugin::METHOD_DEFAULT . '" otherwise.'
             . ' Options: "auto", "symlink", "copy" or "junction"'
         );
         $this->setHelp('This command will update all resources for all installed modules using the given method');
