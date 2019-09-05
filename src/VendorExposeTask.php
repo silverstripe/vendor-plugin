@@ -75,6 +75,10 @@ class VendorExposeTask
         }
         $method = $this->getMethod($methodKey);
 
+        if ($methodKey === VendorPlugin::METHOD_NONE) {
+            return;
+        }
+
         // Update all modules
         foreach ($libraries as $module) {
             // Skip this module if no exposure required
@@ -138,8 +142,8 @@ class VendorExposeTask
             case JunctionMethod::NAME:
                 return new JunctionMethod();
             case VendorPlugin::METHOD_NONE:
-                // 'none' is forced to an empty chain
-                return new ChainedMethod([]);
+                // 'none' is forced to an empty chain (and doesn't run anyway)
+                return new ChainedMethod();
             case VendorPlugin::METHOD_AUTO:
                 // Default to safe-failover method
                 if (Platform::isWindows()) {
