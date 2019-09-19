@@ -50,10 +50,11 @@ class VendorExposeCommand extends BaseCommand
         // Expose all modules
         $method = $input->getArgument('method');
         $task = new VendorExposeTask($this->getProjectPath(), new Filesystem(), $basePublicPath);
-        $task->process($io, $modules, $method);
 
-        // Success
-        $io->write("All modules updated!");
+        if ($task->process($io, $modules, $method)) {
+            // Success
+            $io->write("All modules updated!");
+        }
     }
 
     /**

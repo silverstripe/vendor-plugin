@@ -63,7 +63,7 @@ class VendorExposeTask
     {
         // No-op
         if (empty($libraries)) {
-            return;
+            return false;
         }
 
         // Setup root folder
@@ -76,7 +76,7 @@ class VendorExposeTask
         $method = $this->getMethod($methodKey);
 
         if ($methodKey === VendorPlugin::METHOD_NONE) {
-            return;
+            return false;
         }
 
         // Update all modules
@@ -100,6 +100,8 @@ class VendorExposeTask
 
         // On success, write `.method` token to persist for subsequent updates
         $this->saveMethodKey($methodKey);
+
+        return true;
     }
 
 
