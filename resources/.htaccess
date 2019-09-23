@@ -1,7 +1,6 @@
 # Block .method file
 <Files .method>
-    Order Allow,Deny
-    Deny from all
+    Require all denied
 </Files>
 
 # Block 404s
