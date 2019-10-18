@@ -63,7 +63,7 @@ class VendorExposeTask
     {
         // No-op
         if (empty($libraries)) {
-            return;
+            return false;
         }
 
         // Setup root folder
@@ -74,6 +74,10 @@ class VendorExposeTask
             $methodKey = $this->getMethodKey();
         }
         $method = $this->getMethod($methodKey);
+
+        if ($methodKey === VendorPlugin::METHOD_NONE) {
+            return false;
+        }
 
         // Update all modules
         foreach ($libraries as $module) {
@@ -96,6 +100,8 @@ class VendorExposeTask
 
         // On success, write `.method` token to persist for subsequent updates
         $this->saveMethodKey($methodKey);
+
+        return true;
     }
 
 
@@ -138,8 +144,8 @@ class VendorExposeTask
             case JunctionMethod::NAME:
                 return new JunctionMethod();
             case VendorPlugin::METHOD_NONE:
-                // 'none' is forced to an empty chain
-                return new ChainedMethod([]);
+                // 'none' is forced to an empty chain (and doesn't run anyway)
+                return new ChainedMethod();
             case VendorPlugin::METHOD_AUTO:
                 // Default to safe-failover method
                 if (Platform::isWindows()) {
