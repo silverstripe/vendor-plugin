@@ -9,7 +9,11 @@ cache:
 matrix:
   include:
     - php: 5.6
+      env: COMPOSER_FLAG="--prefer-lowest"
     - php: 7.2
+      env: COMPOSER_FLAG="--prefer-lowest"
+    - php: 7.2
+
 
 fast_finish: true
 
@@ -18,7 +22,7 @@ before_script:
   - export PATH=~/.composer/vendor/bin:$PATH
   - composer validate
   - composer global require squizlabs/php_codesniffer:^3 --prefer-dist --no-interaction --no-progress --no-suggest -o
-  - composer install --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile
+  - composer update $COMPOSER_FLAG --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile
 
 script:
   - vendor/bin/phpunit
