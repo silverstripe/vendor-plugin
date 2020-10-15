@@ -25,13 +25,13 @@
         "lint": "phpcs src/ tests/",
         "lint-clean": "phpcbf src/ tests/"
     },
-    "minimum-stability": "dev",
     "require": {
         "composer/installers": "^1.4",
-        "composer-plugin-api": "^1.1"
+        "composer-plugin-api": "^1.1 || ^2"
     },
     "require-dev": {
-        "composer/composer": "^1.5",
-        "phpunit/phpunit": "^5.7"
+        "composer/composer": "^1.5 || ^2@rc",
+        "phpunit/phpunit": "^5.7",
+        "squizlabs/php_codesniffer": "^3"
     }
 }
