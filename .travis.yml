@@ -18,6 +18,10 @@ matrix:
     - php: 7.4
       env:
        - COMPOSER_SELFUPDATE_ARG=--preview
+    - php: nightly
+      env:
+       - COMPOSER_ARG=--ignore-platform-reqs
+       - COMPOSER_SELFUPDATE_ARG=--preview
 
 fast_finish: true
 
