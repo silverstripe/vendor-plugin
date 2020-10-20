@@ -27,7 +27,8 @@
     },
     "require": {
         "composer/installers": "^1.4",
-        "composer-plugin-api": "^1.1 || ^2"
+        "composer-plugin-api": "^1.1 || ^2",
+        "php": "^7.1 || ^8"
     },
     "require-dev": {
         "composer/composer": "^1.5 || ^2@rc",
