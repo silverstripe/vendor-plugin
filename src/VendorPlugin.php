@@ -248,4 +248,18 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
         );
         $task->process($IO, [$library]);
     }
+
+    /**
+     * Required by the composer 2 plugin interface
+     */
+    public function deactivate(Composer $composer, IOInterface $io)
+    {
+    }
+
+    /**
+     * Required by the composer 2 plugin interface
+     */
+    public function uninstall(Composer $composer, IOInterface $io)
+    {
+    }
 }
