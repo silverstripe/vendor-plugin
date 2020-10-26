@@ -12,7 +12,7 @@ class LibraryTest extends TestCase
      */
     public function testResourcesDir($expected, $projectPath)
     {
-        $path = __DIR__ . '/fixtures/projects/' . $projectPath;
+        $path = __DIR__ . '/../fixtures/projects/' . $projectPath;
         $lib = new Library($path, 'vendor/silverstripe/skynet');
         $this->assertEquals($expected, $lib->getResourcesDir());
     }
@@ -29,7 +29,7 @@ class LibraryTest extends TestCase
     public function testInvalidResourceDir()
     {
         $this->expectException(\LogicException::class);
-        $path = __DIR__ . '/fixtures/projects/ss44InvalidResourcesDir';
+        $path = __DIR__ . '/../fixtures/projects/ss44InvalidResourcesDir';
         $lib = new Library($path, 'vendor/silverstripe/skynet');
         $lib->getResourcesDir();
     }
