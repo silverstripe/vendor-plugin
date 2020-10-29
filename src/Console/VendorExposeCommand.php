@@ -40,7 +40,7 @@ class VendorExposeCommand extends BaseCommand
         $modules = $this->getAllLibraries();
         if (empty($modules)) {
             $io->write("No modules to expose");
-            return;
+            return 0;
         }
 
         // Query first library for base destination
@@ -53,6 +53,7 @@ class VendorExposeCommand extends BaseCommand
 
         // Success
         $io->write("All modules updated!");
+        return 0;
     }
 
     /**
