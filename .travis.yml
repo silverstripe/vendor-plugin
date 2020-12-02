@@ -1,37 +1,23 @@
-language: php
+version: ~> 1.0
 
-dist: trusty
+import:
+  - silverstripe/silverstripe-travis-shared:config/provision/self.yml
 
-cache:
-  directories:
-    - $HOME/.composer/cache/files
+env:
+  global:
+    - PHPUNIT_TEST=1
 
-matrix:
+jobs:
+  fast_finish: true
   include:
     - php: 7.1
       env:
-       - COMPOSER_SELFUPDATE_ARG=--1
-       - COMPOSER_ARG=--prefer-lowest
+        - COMPOSER_INSTALL_ARG=--prefer-lowest
     - php: 7.3
       env:
-       - COMPOSER_SELFUPDATE_ARG=--1
+        - PHPCS_TEST=1
     - php: 7.4
       env:
-       - COMPOSER_SELFUPDATE_ARG=--preview
     - php: nightly
       env:
-       - COMPOSER_ARG=--ignore-platform-reqs
-       - COMPOSER_SELFUPDATE_ARG=--preview
-
-fast_finish: true
-
-before_script:
-  - phpenv rehash
-  - export PATH=~/.composer/vendor/bin:$PATH
-  - composer self-update $COMPOSER_SELFUPDATE_ARG
-  - composer validate
-  - composer update --prefer-dist --no-interaction --no-progress --no-suggest --optimize-autoloader --verbose --profile $COMPOSER_ARG
-
-script:
-  - vendor/bin/phpunit
-  - composer run-script lint
+        - COMPOSER_INSTALL_ARG=--ignore-platform-reqs
