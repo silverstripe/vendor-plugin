@@ -46,8 +46,8 @@ class Library
      */
     public function __construct($basePath, $libraryPath, $name = null)
     {
-        $this->basePath = realpath($basePath);
-        $this->path = realpath($libraryPath);
+        $this->basePath = $basePath;
+        $this->path = $libraryPath;
         $this->name = $name;
     }
 
