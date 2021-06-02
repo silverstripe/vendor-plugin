@@ -3,8 +3,10 @@
     Require all denied
 </Files>
 
-# Block 404s
+# Prevent file listings
 <IfModule mod_rewrite.c>
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule .* - [R=404,L]
+    <IfModule mod_dir.c>
+        DirectoryIndex disabled
+        DirectorySlash On
+    </IfModule>
 </IfModule>
