@@ -24,6 +24,9 @@ class SymlinkMethod implements ExposeMethod
 
     public function exposeDirectory($source, $target)
     {
+        // Remove trailing slash
+        $target = rtrim($target, DIRECTORY_SEPARATOR);
+
         // Remove destination directory to ensure it is clean
         $this->filesystem->removeDirectory($target);
 
