@@ -66,12 +66,48 @@ class SymlinkMethodTest extends TestCase
         $this->assertDirectoryExists(dirname($target));
     }
 
+    public function testSymlinkTrailingSlash()
+    {
+        $method = new SymlinkMethod();
+        $target = Util::joinPaths($this->root, 'resources', 'client') . DIRECTORY_SEPARATOR;
+        $method->exposeDirectory(
+            realpath(__DIR__.'/../fixtures/source/client/'),
+            $target
+        );
+
+        // Ensure file exists
+        $this->assertFileExists(Util::joinPaths($this->root, 'resources', 'client', 'subfolder', 'somefile.txt'));
+
+        // Folder is NOT a real folder
+        if (Platform::isWindows()) {
+            $this->assertTrue($this->filesystem->isJunction($target));
+        } else {
+            $this->assertTrue($this->filesystem->isSymlinkedDirectory($target));
+        }
+
+        // Parent folder is a real folder
+        $this->assertDirectoryExists(dirname($target));
+    }
+
     public function testRecoversFromCopy()
     {
         $method = new CopyMethod();
         $target = Util::joinPaths($this->root, 'resources', 'client');
         $method->exposeDirectory(
             realpath(__DIR__.'/../fixtures/source/client'),
+            $target
+        );
+
+        // Repeat prior test
+        $this->testSymlink();
+    }
+
+    public function testRecoversFromCopyTrailingSlash()
+    {
+        $method = new CopyMethod();
+        $target = Util::joinPaths($this->root, 'resources', 'client') . DIRECTORY_SEPARATOR;
+        $method->exposeDirectory(
+            realpath(__DIR__.'/../fixtures/source/client/'),
             $target
         );
 
