@@ -20,7 +20,7 @@ class CopyMethodTest extends TestCase
      */
     protected $root = null;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -36,7 +36,7 @@ class CopyMethodTest extends TestCase
         $this->filesystem->ensureDirectoryExists($this->root);
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->filesystem->remove($this->root);
         parent::tearDown();
