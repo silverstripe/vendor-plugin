@@ -185,6 +185,9 @@ class Library
             return $this->json;
         }
         $composer = Util::joinPaths($this->getPath(), 'composer.json');
+        if (!file_exists($composer)) {
+            return [];
+        }
         $file = new JsonFile($composer);
         $this->json = $file->read();
         return $this->json;
