@@ -69,7 +69,7 @@ class ChainedMethodTest extends TestCase
 
 
         // Parent folder is a real folder
-        $this->assertFalse($this->filesystem->isSymlinkedDirectory(dirname($target)));
-        $this->assertDirectoryExists(dirname($target));
+        $this->assertFalse($this->filesystem->isSymlinkedDirectory(dirname($target ?? '')));
+        $this->assertDirectoryExists(dirname($target ?? ''));
     }
 }

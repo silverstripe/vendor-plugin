@@ -73,7 +73,7 @@ class VendorExposeCommand extends BaseCommand
         foreach ($this->getModulePaths() as $modulePath) {
             // Filter by non-composer folders
             $composerPath = Util::joinPaths($modulePath, 'composer.json');
-            if (!file_exists($composerPath)) {
+            if (!file_exists($composerPath ?? '')) {
                 continue;
             }
 
@@ -113,21 +113,21 @@ class VendorExposeCommand extends BaseCommand
 
         // Get vendor modules
         $search = Util::joinPaths($basePath, 'vendor', '*', '*');
-        foreach (glob($search, GLOB_ONLYDIR) as $modulePath) {
+        foreach (glob($search ?? '', GLOB_ONLYDIR) as $modulePath) {
             if ($this->isPathModule($modulePath)) {
                 yield $modulePath;
             }
         }
 
         // Check if public/ folder exists
-        $publicExists = is_dir(Util::joinPaths($basePath, Library::PUBLIC_PATH));
+        $publicExists = is_dir(Util::joinPaths($basePath, Library::PUBLIC_PATH) ?? '');
         if (!$publicExists) {
             return;
         }
 
         // Search all base folders / modules
         $search = Util::joinPaths($basePath, '*');
-        foreach (glob($search, GLOB_ONLYDIR) as $modulePath) {
+        foreach (glob($search ?? '', GLOB_ONLYDIR) as $modulePath) {
             if ($this->isPathModule($modulePath)) {
                 yield $modulePath;
             }
@@ -135,7 +135,7 @@ class VendorExposeCommand extends BaseCommand
 
         // Check all themes
         $search = Util::joinPaths($basePath, 'themes', '*');
-        foreach (glob($search, GLOB_ONLYDIR) as $themePath) {
+        foreach (glob($search ?? '', GLOB_ONLYDIR) as $themePath) {
             yield $themePath;
         }
     }
@@ -148,8 +148,8 @@ class VendorExposeCommand extends BaseCommand
      */
     protected function isPathModule($path)
     {
-        return file_exists(Util::joinPaths($path, '_config'))
-            || file_exists(Util::joinPaths($path, '_config.php'));
+        return file_exists(Util::joinPaths($path, '_config') ?? '')
+            || file_exists(Util::joinPaths($path, '_config.php') ?? '');
     }
 
     /**
@@ -157,6 +157,6 @@ class VendorExposeCommand extends BaseCommand
      */
     protected function getProjectPath()
     {
-        return dirname(realpath(Factory::getComposerFile()));
+        return dirname(realpath(Factory::getComposerFile() ?? '') ?? '');
     }
 }

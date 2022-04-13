@@ -166,7 +166,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
      */
     protected function getProjectPath()
     {
-        return dirname(realpath(Factory::getComposerFile()));
+        return dirname(realpath(Factory::getComposerFile() ?? '') ?? '');
     }
 
     /**
@@ -184,7 +184,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
 
         // Check path to remove
         $target = $library->getPublicPath();
-        if (!is_dir($target)) {
+        if (!is_dir($target ?? '')) {
             return;
         }
 
@@ -194,7 +194,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
         $this->filesystem->removeDirectory($target);
 
         // Cleanup empty vendor dir if this is the last module
-        $targetParent = dirname($target);
+        $targetParent = dirname($target ?? '');
         if ($this->filesystem->isDirEmpty($targetParent)) {
             $this->filesystem->removeDirectory($targetParent);
         }

@@ -46,8 +46,8 @@ class CopyMethod implements ExposeMethod
      */
     public function copy($source, $target)
     {
-        if (!is_dir($source)) {
-            return copy($source, $target);
+        if (!is_dir($source ?? '')) {
+            return copy($source ?? '', $target ?? '');
         }
         $it = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
         /** @var RecursiveDirectoryIterator $ri */
@@ -59,7 +59,7 @@ class CopyMethod implements ExposeMethod
             if ($file->isDir()) {
                 $this->filesystem->ensureDirectoryExists($targetPath);
             } else {
-                $result = $result && copy($file->getPathname(), $targetPath);
+                $result = $result && copy($file->getPathname() ?? '', $targetPath ?? '');
             }
         }
         return $result;

@@ -30,7 +30,7 @@ class VendorModule extends Library
         $path = Util::joinPaths(
             $basePath,
             static::DEFAULT_SOURCE,
-            explode('/', $name)
+            explode('/', $name ?? '')
         );
         parent::__construct($basePath, $path, $name);
     }
