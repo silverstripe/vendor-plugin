@@ -120,10 +120,10 @@ class VendorExposeTask
         $files = new DirectoryIterator(__DIR__.'/../resources');
         foreach ($files as $file) {
             $targetPath = $resourcesPath . DIRECTORY_SEPARATOR . $file->getFilename();
-            if ($file->isFile() && !file_exists($targetPath)) {
+            if ($file->isFile() && !file_exists($targetPath ?? '')) {
                 $name = $file->getFilename();
                 $io->write("Writing <info>{$name}</info> to resources folder");
-                copy($file->getPathname(), $targetPath);
+                copy($file->getPathname() ?? '', $targetPath ?? '');
             }
         }
     }
@@ -169,8 +169,8 @@ class VendorExposeTask
     {
         // Switch if `resources/.method` contains a file
         $methodFilePath = $this->getMethodFilePath();
-        if (file_exists($methodFilePath) && is_readable($methodFilePath)) {
-            return trim(file_get_contents($methodFilePath));
+        if (file_exists($methodFilePath ?? '') && is_readable($methodFilePath ?? '')) {
+            return trim(file_get_contents($methodFilePath ?? '') ?? '');
         }
 
         // Switch based on SS_VENDOR_METHOD arg
@@ -191,7 +191,7 @@ class VendorExposeTask
     protected function saveMethodKey($key)
     {
         $methodFilePath = $this->getMethodFilePath();
-        file_put_contents($methodFilePath, $key);
+        file_put_contents($methodFilePath ?? '', $key);
     }
 
     /**

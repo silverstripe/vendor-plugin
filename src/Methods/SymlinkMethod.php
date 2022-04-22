@@ -25,13 +25,13 @@ class SymlinkMethod implements ExposeMethod
     public function exposeDirectory($source, $target)
     {
         // Remove trailing slash
-        $target = rtrim($target, DIRECTORY_SEPARATOR);
+        $target = rtrim($target ?? '', DIRECTORY_SEPARATOR);
 
         // Remove destination directory to ensure it is clean
         $this->filesystem->removeDirectory($target);
 
         // Ensure parent dir exist
-        $parent = dirname($target);
+        $parent = dirname($target ?? '');
         $this->filesystem->ensureDirectoryExists($parent);
 
         // Ensure symlink exists

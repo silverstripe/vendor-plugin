@@ -56,8 +56,8 @@ class Library
         $libraryPath,
         $name = null
     ) {
-        $this->basePath = realpath($basePath);
-        $this->path = realpath($libraryPath);
+        $this->basePath = realpath($basePath ?? '');
+        $this->path = realpath($libraryPath ?? '');
         $this->name = $name;
     }
 
@@ -146,7 +146,7 @@ class Library
      */
     public function getRelativePath()
     {
-        return trim(substr($this->path, strlen($this->basePath)), self::TRIM_CHARS);
+        return trim(substr($this->path ?? '', strlen($this->basePath ?? '')), self::TRIM_CHARS ?? '');
     }
 
     /**
@@ -161,7 +161,7 @@ class Library
         // 4.0 compatibility: If there is no public folder, and this is a vendor path,
         // remove the leading `vendor` from the destination
         if (!$this->publicPathExists() && $this->installedIntoVendor()) {
-            $relativePath = substr($relativePath, strlen('vendor/'));
+            $relativePath = substr($relativePath ?? '', strlen('vendor/'));
         }
 
         return Util::joinPaths($this->getBasePublicPath(), $relativePath);
@@ -185,7 +185,7 @@ class Library
             return $this->json;
         }
         $composer = Util::joinPaths($this->getPath(), 'composer.json');
-        if (!file_exists($composer)) {
+        if (!file_exists($composer ?? '')) {
             return [];
         }
         $file = new JsonFile($composer);
@@ -264,13 +264,13 @@ class Library
      */
     protected function validateFolder($exposeFolder)
     {
-        if (strstr($exposeFolder, '.')) {
+        if (strstr($exposeFolder ?? '', '.')) {
             return false;
         }
-        if (strpos($exposeFolder, '/') === 0) {
+        if (strpos($exposeFolder ?? '', '/') === 0) {
             return false;
         }
-        if (strpos($exposeFolder, '\\') === 0) {
+        if (strpos($exposeFolder ?? '', '\\') === 0) {
             return false;
         }
         return true;
@@ -283,7 +283,7 @@ class Library
      */
     public function publicPathExists()
     {
-        return is_dir(Util::joinPaths($this->getBasePath(), self::PUBLIC_PATH));
+        return is_dir(Util::joinPaths($this->getBasePath(), self::PUBLIC_PATH) ?? '');
     }
 
     /**
@@ -293,7 +293,7 @@ class Library
      */
     protected function installedIntoVendor()
     {
-        return preg_match('#^vendor[/\\\\]#', $this->getRelativePath());
+        return preg_match('#^vendor[/\\\\]#', $this->getRelativePath() ?? '');
     }
 
     /**
@@ -316,7 +316,7 @@ class Library
             : self::DEFAULT_RESOURCES_DIR;
 
 
-        if (preg_match('/^[_\-a-z0-9]+$/i', $resourcesDir)) {
+        if (preg_match('/^[_\-a-z0-9]+$/i', $resourcesDir ?? '')) {
             return $resourcesDir;
         }
 

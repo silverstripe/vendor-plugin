@@ -63,7 +63,7 @@ class SymlinkMethodTest extends TestCase
         }
 
         // Parent folder is a real folder
-        $this->assertDirectoryExists(dirname($target));
+        $this->assertDirectoryExists(dirname($target ?? ''));
     }
 
     public function testSymlinkTrailingSlash()
@@ -86,7 +86,7 @@ class SymlinkMethodTest extends TestCase
         }
 
         // Parent folder is a real folder
-        $this->assertDirectoryExists(dirname($target));
+        $this->assertDirectoryExists(dirname($target ?? ''));
     }
 
     public function testRecoversFromCopy()
