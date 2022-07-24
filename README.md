@@ -1,6 +1,6 @@
 ## SilverStripe Vendor Plugin
 
-[![Build Status](https://api.travis-ci.com/silverstripe/vendor-plugin.svg?branch=1)](https://travis-ci.com/silverstripe/vendor-plugin)
+[![CI](https://github.com/silverstripe/vendor-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/silverstripe/vendor-plugin/actions/workflows/ci.yml)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/silverstripe/vendor-plugin/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/silverstripe/vendor-plugin/?branch=master)
 [![SilverStripe supported module](https://img.shields.io/badge/silverstripe-supported-0071C4.svg)](https://www.silverstripe.org/software/addons/silverstripe-commercially-supported-module-list/)
 
