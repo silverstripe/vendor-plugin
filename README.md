@@ -1,10 +1,9 @@
-## SilverStripe Vendor Plugin
+## Silverstripe Vendor Plugin
 
 [![CI](https://github.com/silverstripe/vendor-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/silverstripe/vendor-plugin/actions/workflows/ci.yml)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/silverstripe/vendor-plugin/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/silverstripe/vendor-plugin/?branch=master)
-[![SilverStripe supported module](https://img.shields.io/badge/silverstripe-supported-0071C4.svg)](https://www.silverstripe.org/software/addons/silverstripe-commercially-supported-module-list/)
+[![Silverstripe supported module](https://img.shields.io/badge/silverstripe-supported-0071C4.svg)](https://www.silverstripe.org/software/addons/silverstripe-commercially-supported-module-list/)
 
-When installing SilverStripe modules in the vendor directory it may also be necessary
+When installing Silverstripe modules in the vendor directory it may also be necessary
 to ensure certain module assets are exposed to the webroot, as the 'vendor' url prefix
 is blocked from web-access by default.
 
