@@ -22,7 +22,7 @@ class Library
     /**
      * Default folder where vendor resources will be exposed.
      */
-    const DEFAULT_RESOURCES_DIR = 'resources';
+    const DEFAULT_RESOURCES_DIR = '_resources';
 
     /**
      * Project root

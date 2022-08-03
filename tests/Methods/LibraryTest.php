@@ -20,7 +20,7 @@ class LibraryTest extends TestCase
     public function resourcesDirProvider()
     {
         return [
-            ['resources', 'ss43'],
+            ['_resources', 'ss43'],
             ['_resources', 'ss44'],
             ['customised-resources-dir', 'ss44WithCustomResourcesDir']
         ];
