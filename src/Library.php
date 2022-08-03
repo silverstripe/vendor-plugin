@@ -20,15 +20,9 @@ class Library
     const PUBLIC_PATH = 'public';
 
     /**
-     * Default folder where vendor resources will be exposed.
+     * Folder where vendor resources will be exposed within public webroot
      */
-    const DEFAULT_RESOURCES_DIR = 'resources';
-
-    /**
-     * Subfolder to map within public webroot
-     * @deprecated 1.4.0..2.0.0 Use Library::getResourcesDir() instead
-     */
-    const RESOURCES_PATH = self::DEFAULT_RESOURCES_DIR;
+    const RESOURCES_PATH = '_resources';
 
     /**
      * Project root
@@ -120,7 +114,7 @@ class Library
     public function getBasePublicPath()
     {
         $projectPath = $this->getBasePath();
-        $resourceDir = $this->getResourcesDir();
+        $resourceDir = self::RESOURCES_PATH;
         $publicPath = $this->publicPathExists()
             ? Util::joinPaths($projectPath, self::PUBLIC_PATH, $resourceDir)
             : Util::joinPaths($projectPath, $resourceDir);
@@ -294,36 +288,5 @@ class Library
     protected function installedIntoVendor()
     {
         return preg_match('#^vendor[/\\\\]#', $this->getRelativePath() ?? '');
-    }
-
-    /**
-     * Determine the name of the folder where vendor module's resources will be exposed. e.g. `_resources`
-     * @throws LogicException
-     * @return string
-     */
-    public function getResourcesDir()
-    {
-        $rootComposerFile = $this->getBasePath() . '/composer.json';
-        $rootProject = new JsonFile($rootComposerFile, null, new NullIO());
-
-        if (!$rootProject->exists()) {
-            return self::DEFAULT_RESOURCES_DIR;
-        }
-
-        $rootProjectData = $rootProject->read();
-        $resourcesDir = isset($rootProjectData['extra']['resources-dir'])
-            ? $rootProjectData['extra']['resources-dir']
-            : self::DEFAULT_RESOURCES_DIR;
-
-
-        if (preg_match('/^[_\-a-z0-9]+$/i', $resourcesDir ?? '')) {
-            return $resourcesDir;
-        }
-
-        throw new LogicException(sprintf(
-            'Resources dir error: "%s" is not a valid resources directory name. Update the ' .
-            '`extra.resources-dir` key in your composer.json file',
-            $resourcesDir
-        ));
     }
 }

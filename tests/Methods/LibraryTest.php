@@ -10,27 +10,25 @@ class LibraryTest extends TestCase
     /**
      * @dataProvider resourcesDirProvider
      */
-    public function testResourcesDir($expected, $projectPath)
+    public function testGetBasePublicPath(string $projectPath, bool $hasDir): void
     {
         $path = __DIR__ . '/../fixtures/projects/' . $projectPath;
         $lib = new Library($path, 'vendor/silverstripe/skynet');
-        $this->assertEquals($expected, $lib->getResourcesDir());
+        if ($hasDir) {
+            $expected = realpath($path) . '/public/_resources';
+        } else {
+            $expected = realpath($path) . '/_resources';
+        }
+        $this->assertEquals($expected, $lib->getBasePublicPath());
     }
 
     public function resourcesDirProvider()
     {
         return [
-            ['resources', 'ss43'],
-            ['_resources', 'ss44'],
-            ['customised-resources-dir', 'ss44WithCustomResourcesDir']
+            ['ss43', true],
+            ['ss44', true],
+            ['ss44WithCustomResourcesDir', true],
+            ['noPublicDir', false],
         ];
-    }
-
-    public function testInvalidResourceDir()
-    {
-        $this->expectException(\LogicException::class);
-        $path = __DIR__ . '/../fixtures/projects/ss44InvalidResourcesDir';
-        $lib = new Library($path, 'vendor/silverstripe/skynet');
-        $lib->getResourcesDir();
     }
 }

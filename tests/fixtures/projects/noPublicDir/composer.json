@@ -1,0 +1,8 @@
+{
+    "description": "Fake project using SS 4.x with no public dir",
+    "require": {
+        "silverstripe/recipe-cms": "^4.0"
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}
