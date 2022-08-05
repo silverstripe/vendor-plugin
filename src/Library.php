@@ -22,13 +22,7 @@ class Library
     /**
      * Default folder where vendor resources will be exposed.
      */
-    const DEFAULT_RESOURCES_DIR = 'resources';
-
-    /**
-     * Subfolder to map within public webroot
-     * @deprecated 1.4.0..2.0.0 Use Library::getResourcesDir() instead
-     */
-    const RESOURCES_PATH = self::DEFAULT_RESOURCES_DIR;
+    const DEFAULT_RESOURCES_DIR = '_resources';
 
     /**
      * Project root
