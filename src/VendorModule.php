@@ -5,7 +5,7 @@ namespace SilverStripe\VendorPlugin;
 /**
  * Represents a module in the vendor folder
  *
- * @deprecated 1.3..2.0 Use Library instead
+ * @deprecated 1.3.0 Use Library instead
  */
 class VendorModule extends Library
 {
@@ -38,7 +38,7 @@ class VendorModule extends Library
     /**
      * Get full path to the root install for this project
      *
-     * @deprecated 1.3..2.0 use getPath() instead
+     * @deprecated 1.3.0 Use getPath() instead
      * @param string $base Rewrite root (or 'vendor' for actual module path)
      * @return string Path for this module
      */
