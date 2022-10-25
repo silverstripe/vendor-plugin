@@ -96,7 +96,7 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
     /**
      * Get vendor module instance for this event
      *
-     * @deprecated 1.3..2.0
+     * @deprecated 1.3.0 Use getLibrary() instead
      * @param PackageEvent $event
      * @return Library|null
      */

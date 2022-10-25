@@ -92,7 +92,7 @@ class VendorExposeCommand extends BaseCommand
     /**
      * Find all modules
      *
-     * @deprecated 1.3..2.0
+     * @deprecated 1.3.0 Use getAllLibraries() instead
      * @return Library[]
      */
     protected function getAllModules()
