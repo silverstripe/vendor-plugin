@@ -2,6 +2,7 @@
 
 namespace SilverStripe\VendorPlugin;
 
+use SilverStripe\Dev\Deprecation;
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
 use Composer\DependencyResolver\Operation\UninstallOperation;
@@ -26,14 +27,14 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
     /**
      * Default module type
      *
-     * @deprecated 1.3..2.0 No longer used
+     * @deprecated 1.3.0 Will be removed without equivalent functionality to replace it
      */
     const MODULE_TYPE = 'silverstripe-vendormodule';
 
     /**
      * Filter for matching library types to expose
      *
-     * @deprecated 1.3..2.0 No longer used
+     * @deprecated 1.3.0 Will be removed without equivalent functionality to replace it
      */
     const MODULE_FILTER = '/^silverstripe\-(\w+)$/';
 
@@ -96,12 +97,13 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
     /**
      * Get vendor module instance for this event
      *
-     * @deprecated 1.3..2.0
+     * @deprecated 1.3.0 Use getLibrary() instead
      * @param PackageEvent $event
      * @return Library|null
      */
     protected function getVendorModule(PackageEvent $event)
     {
+        Deprecation::notice('1.3.0', 'Use getLibrary() instead');
         return $this->getLibrary($event);
     }
 

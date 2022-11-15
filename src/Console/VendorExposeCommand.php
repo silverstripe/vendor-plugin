@@ -2,6 +2,7 @@
 
 namespace SilverStripe\VendorPlugin\Console;
 
+use SilverStripe\Dev\Deprecation;
 use Composer\Command\BaseCommand;
 use Composer\Factory;
 use Composer\IO\ConsoleIO;
@@ -92,11 +93,12 @@ class VendorExposeCommand extends BaseCommand
     /**
      * Find all modules
      *
-     * @deprecated 1.3..2.0
+     * @deprecated 1.3.0 Use getAllLibraries() instead
      * @return Library[]
      */
     protected function getAllModules()
     {
+        Deprecation::notice('1.3.0', 'Use getAllLibraries() instead');
         return $this->getAllLibraries();
     }
 

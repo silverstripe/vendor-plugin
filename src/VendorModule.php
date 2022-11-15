@@ -2,10 +2,12 @@
 
 namespace SilverStripe\VendorPlugin;
 
+use SilverStripe\Dev\Deprecation;
+
 /**
  * Represents a module in the vendor folder
  *
- * @deprecated 1.3..2.0 Use Library instead
+ * @deprecated 1.3.0 Use Library instead
  */
 class VendorModule extends Library
 {
@@ -27,6 +29,7 @@ class VendorModule extends Library
      */
     public function __construct($basePath, $name)
     {
+        Deprecation::notice('1.3.0', 'Use Library instead', Deprecation::SCOPE_CLASS);
         $path = Util::joinPaths(
             $basePath,
             static::DEFAULT_SOURCE,
@@ -38,12 +41,13 @@ class VendorModule extends Library
     /**
      * Get full path to the root install for this project
      *
-     * @deprecated 1.3..2.0 use getPath() instead
+     * @deprecated 1.3.0 Use getPath() instead
      * @param string $base Rewrite root (or 'vendor' for actual module path)
      * @return string Path for this module
      */
     public function getModulePath($base = self::DEFAULT_SOURCE)
     {
+        Deprecation::notice('1.3.0', 'Use getPath() instead');
         if ($base === self::DEFAULT_TARGET) {
             return $this->getPublicPath();
         } else {

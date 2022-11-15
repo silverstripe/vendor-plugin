@@ -26,7 +26,7 @@ class Library
 
     /**
      * Subfolder to map within public webroot
-     * @deprecated 1.4.0..2.0.0 Use Library::getResourcesDir() instead
+     * @deprecated 1.4.0 Use Library::getResourcesDir() instead
      */
     const RESOURCES_PATH = self::DEFAULT_RESOURCES_DIR;
 
