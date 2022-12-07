@@ -24,20 +24,6 @@ use SilverStripe\VendorPlugin\Console\VendorCommandProvider;
 class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
 {
     /**
-     * Default module type
-     *
-     * @deprecated 1.3..2.0 No longer used
-     */
-    const MODULE_TYPE = 'silverstripe-vendormodule';
-
-    /**
-     * Filter for matching library types to expose
-     *
-     * @deprecated 1.3..2.0 No longer used
-     */
-    const MODULE_FILTER = '/^silverstripe\-(\w+)$/';
-
-    /**
      * Method env var to query
      */
     const METHOD_ENV = 'SS_VENDOR_METHOD';
@@ -91,18 +77,6 @@ class VendorPlugin implements PluginInterface, EventSubscriberInterface, Capable
             'post-install-cmd' => 'installRootPackage',
             'post-update-cmd' => 'installRootPackage',
         ];
-    }
-
-    /**
-     * Get vendor module instance for this event
-     *
-     * @deprecated 1.3.0 Use getLibrary() instead
-     * @param PackageEvent $event
-     * @return Library|null
-     */
-    protected function getVendorModule(PackageEvent $event)
-    {
-        return $this->getLibrary($event);
     }
 
     /**
