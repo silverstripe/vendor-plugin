@@ -115,9 +115,7 @@ class Library
     {
         $projectPath = $this->getBasePath();
         $resourceDir = $this->getResourcesDir();
-        $publicPath = $this->publicPathExists()
-            ? Util::joinPaths($projectPath, self::PUBLIC_PATH, $resourceDir)
-            : Util::joinPaths($projectPath, $resourceDir);
+        $publicPath = Util::joinPaths($projectPath, self::PUBLIC_PATH, $resourceDir);
         return $publicPath;
     }
 
@@ -152,12 +150,6 @@ class Library
     {
         $relativePath = $this->getRelativePath();
 
-        // 4.0 compatibility: If there is no public folder, and this is a vendor path,
-        // remove the leading `vendor` from the destination
-        if (!$this->publicPathExists() && $this->installedIntoVendor()) {
-            $relativePath = substr($relativePath ?? '', strlen('vendor/'));
-        }
-
         return Util::joinPaths($this->getBasePublicPath(), $relativePath);
     }
 
@@ -189,7 +181,6 @@ class Library
 
     /**
      * Determine if this module should be exposed.
-     * Note: If not using public folders, only vendor modules need to be exposed
      *
      * @return bool
      */
@@ -200,8 +191,7 @@ class Library
             return false;
         }
 
-        // Expose if either public root exists, or vendor module
-        return $this->publicPathExists() || $this->installedIntoVendor();
+        return true;
     }
 
     /**
@@ -268,26 +258,6 @@ class Library
             return false;
         }
         return true;
-    }
-
-    /**
-     * Determin eif the public folder exists
-     *
-     * @return bool
-     */
-    public function publicPathExists()
-    {
-        return is_dir(Util::joinPaths($this->getBasePath(), self::PUBLIC_PATH) ?? '');
-    }
-
-    /**
-     * Check if this module is installed in vendor
-     *
-     * @return bool
-     */
-    protected function installedIntoVendor()
-    {
-        return preg_match('#^vendor[/\\\\]#', $this->getRelativePath() ?? '');
     }
 
     /**
