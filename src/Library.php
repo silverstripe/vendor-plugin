@@ -280,6 +280,7 @@ class Library
      * Determin eif the public folder exists
      *
      * @return bool
+     * @deprecated 1.7.0 Will be removed without equivalent functionality to replace it
      */
     public function publicPathExists()
     {
@@ -290,6 +291,7 @@ class Library
      * Check if this module is installed in vendor
      *
      * @return bool
+     * @deprecated 1.7.0 Will be removed without equivalent functionality to replace it
      */
     protected function installedIntoVendor()
     {
