@@ -7,6 +7,12 @@ When installing Silverstripe modules in the vendor directory it may also be nece
 to ensure certain module assets are exposed to the webroot, as the 'vendor' url prefix
 is blocked from web-access by default.
 
+## Installation
+
+```sh
+composer require silverstripe/vendor-plugin
+```
+
 ## Example
 
 For example, given the below module composer.json:
