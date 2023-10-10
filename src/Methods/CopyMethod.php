@@ -30,7 +30,7 @@ class CopyMethod implements ExposeMethod
         $this->filesystem->removeDirectory($target);
 
         // Copy to destination
-        if (!$this->copy($source, $target)) {
+        if (!$this->filesystem->copy($source, $target)) {
             throw new RuntimeException("Could not write to directory $target");
         }
     }
@@ -38,10 +38,10 @@ class CopyMethod implements ExposeMethod
     /**
      * Copies a file or directory from $source to $target.
      *
-     * @todo Replace with `$this->filesystem->copy() once composer 1.6.0 is released
      *
      * @param string $source
      * @param string $target
+     * @deprecated 5.2 Use Filesystem::copy instead
      * @return bool
      */
     public function copy($source, $target)
