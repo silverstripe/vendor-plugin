@@ -4,11 +4,12 @@ namespace SilverStripe\VendorPlugin\Tests\Methods;
 
 use PHPUnit\Framework\TestCase;
 use SilverStripe\VendorPlugin\Library;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 class LibraryTest extends TestCase
 {
-    #[DataProvider('resourcesDirProvider')]
+    /**
+     * @dataProvider resourcesDirProvider
+     */
     public function testResourcesDir($expected, $projectPath)
     {
         $path = __DIR__ . '/../fixtures/projects/' . $projectPath;
@@ -16,7 +17,7 @@ class LibraryTest extends TestCase
         $this->assertEquals($expected, $lib->getResourcesDir());
     }
 
-    public static function resourcesDirProvider()
+    public function resourcesDirProvider()
     {
         return [
             ['_resources', 'ss43'],
