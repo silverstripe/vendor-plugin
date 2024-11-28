@@ -19,7 +19,7 @@ class CopyMethod implements ExposeMethod
      */
     protected $filesystem = null;
 
-    public function __construct(Filesystem $filesystem = null)
+    public function __construct(?Filesystem $filesystem = null)
     {
         $this->filesystem = $filesystem ?: new Filesystem();
     }
