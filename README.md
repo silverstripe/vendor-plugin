@@ -11,6 +11,8 @@ is blocked from web-access by default.
 
 For example, given the below module composer.json:
 
+(note there is no need to explicitly add `silverstripe/vendor-plugin` as a dependency when `silverstripe/framework` is included)
+
 ```json
 {
     "name": "tractorcow/anothermodule",
@@ -22,7 +24,6 @@ For example, given the below module composer.json:
         ]
     },
     "require": {
-        "silverstripe/vendor-plugin": "^1.0",
         "silverstripe/framework": "^4.0"
     }
 }
