@@ -33,7 +33,7 @@ class VendorExposeCommand extends BaseCommand
         $this->setHelp('This command will update all resources for all installed modules using the given method');
     }
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new ConsoleIO($input, $output, $this->getHelperSet());
 
@@ -55,7 +55,7 @@ class VendorExposeCommand extends BaseCommand
             // Success
             $io->write("All modules updated!");
         }
-        
+
         return 0;
     }
 
