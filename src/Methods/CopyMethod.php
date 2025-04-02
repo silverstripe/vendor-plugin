@@ -41,7 +41,7 @@ class CopyMethod implements ExposeMethod
      *
      * @param string $source
      * @param string $target
-     * @deprecated 5.2 Use Filesystem::copy instead
+     * @deprecated 2.1.0 Use Filesystem::copy instead
      * @return bool
      */
     public function copy($source, $target)
