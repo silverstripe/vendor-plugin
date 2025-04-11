@@ -3,8 +3,6 @@
 namespace SilverStripe\VendorPlugin\Methods;
 
 use Composer\Util\Filesystem;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use RuntimeException;
 
 /**
